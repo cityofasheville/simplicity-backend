@@ -1,6 +1,6 @@
 #Process data for our new simplicity app
 
-##generates data structure for simplicty app
+##Generates data structure for simplicty app
 This process data and creates a data cache so all spatial queries are completed in advance. 
 
 ##Software
