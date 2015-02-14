@@ -1,0 +1,1 @@
+DELETE FROM gisowner.coa_overlay_data_cache_hold WHERE data is null;

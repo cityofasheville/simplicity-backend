@@ -1,0 +1,1 @@
+SELECT string_agg(trim(tp),',')::text FROM (SELECT b.distance::text as tp FROM gisowner.coa_address_buffers_cache_hold b group by distance) as hold;
