@@ -9,6 +9,7 @@ export PGPASSWORD
 sleep 2m
 /usr/bin/psql -U [CHANGE-TO-YOUR-POSTGRES-USERNAME] -d coagis -f /home/ubuntu/job/resequence_cache.sql
 /usr/bin/psql -U [CHANGE-TO-YOUR-POSTGRES-USERNAME] -d coagis -f /home/ubuntu/job/truncate_cache.sql
+/usr/bin/psql -U [CHANGE-TO-YOUR-POSTGRES-USERNAME] -d coagis -f /home/ubuntu/job/reindex-shapes.sql
 rcraw=$(psql -U [CHANGE-TO-YOUR-POSTGRES-USERNAME] -d coagis -f /home/ubuntu/job/address_count.sql -t)
 START=0 
 inc=1000
@@ -62,3 +63,5 @@ IFS=$OLDIFS
 sleep 600
 echo $(date)
 /usr/bin/psql -U [CHANGE-TO-YOUR-POSTGRES-USERNAME] -d coagis -f /home/ubuntu/job/update_coa_street_name_cache.sql &
+/usr/bin/psql -U [CHANGE-TO-YOUR-POSTGRES-USERNAME] -d coagis -f /home/ubuntu/job/update-live.sql &
+/usr/bin/psql -U [CHANGE-TO-YOUR-POSTGRES-USERNAME] -d coagis -f /home/ubuntu/job/reindex-shapes.sql

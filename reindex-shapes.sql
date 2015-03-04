@@ -24,6 +24,7 @@ REINDEX INDEX gisowner.a20_ix1;
 REINDEX INDEX gisowner.a12_ix1;
 REINDEX INDEX gisowner.a19_ix1;
 
+
 REINDEX INDEX gisowner.coa_address_buffers_cache_hold_shape;
 REINDEX INDEX gisowner.coa_opendata_address_hold_shape;
 REINDEX INDEX gisowner.coa_opendata_asheville_neighborhoods_hold_shape;
