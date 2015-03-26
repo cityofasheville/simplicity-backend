@@ -1,0 +1,1 @@
+SELECT alias::text as data FROM gisowner.coa_control_layers  WHERE objectid = :one;
