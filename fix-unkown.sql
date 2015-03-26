@@ -1,2 +1,0 @@
-update gisowner.coa_opendata_streets_hold set street_responsibility = 'UNKNOWN' where street_responsibility = 'UNKOWN';
-update gisowner.coa_opendata_streets_hold set street_snowremoval = 'UNKNOWN' where street_snowremoval = 'UNKOWN';
