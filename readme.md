@@ -32,4 +32,4 @@ This process data and creates a data cache so all spatial queries are completed 
 
 
 ###cron job add 
-/bin/bash /home/ubuntu/job/create-overlays.sh >  /home/ubuntu/job/overlays.log &
+/bin/bash /home/ubuntu/job/create-overlays.sh >  /home/ubuntu/job/log/overlays.log &
