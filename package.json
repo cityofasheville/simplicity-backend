@@ -1,0 +1,25 @@
+{
+  "name": "PSQL-JOBS",
+  "version": "0.0.0",
+  "description": "postgros jobs for managing COA gis servers",
+  "main": "index.js",
+  "dependencies": {
+    "pg": "~4.3.0",
+    "yamljs": "~0.2.1",
+    "nodemailer": "~1.3.2",
+    "pg-cursor": "~1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cityofasheville/PSQL-JOBS.git"
+  },
+  "author": "",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/cityofasheville/PSQL-JOBS/issues"
+  }
+}

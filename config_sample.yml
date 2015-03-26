@@ -1,0 +1,33 @@
+databases:
+- host: HOSTorIP
+  database: DATABASENAME
+  user: USERNAME
+  password: PASSWORD
+  preparedStatments:
+  - name: GENERIC_NAME
+    text: SQl_STATEMENT
+    values: ARRAY_OF_PARAMATERS
+  - name: GENERIC_NAME
+    text: SQl_STATEMENT
+    values: ARRAY_OF_PARAMATERS
+  sqlFiles:
+  - name: GENERIC_NAME
+    file: SQL_FILE_LOCATION
+  - name: GENERIC_NAME
+    file: SQL_FILE_LOCATION
+- host: HOSTorIP
+  database: DATABASENAME
+  user: USERNAME
+  password: PASSWORD
+  preparedStatments:
+  - name: GENERIC_NAME
+    text: SQl_STATEMENT
+    values: ARRAY_OF_PARAMATERS
+  - name: GENERIC_NAME
+    text: SQl_STATEMENT
+    values: ARRAY_OF_PARAMATERS
+  sqlFiles:
+  - name: GENERIC_NAME
+    file: SQL_FILE_LOCATION
+  - name: GENERIC_NAME
+    file: SQL_FILE_LOCATION

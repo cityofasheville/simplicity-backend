@@ -1,0 +1,13 @@
+sql:
+- name: reindex gisowner.coa_opendata_address
+  text: REINDEX TABLE gisowner.coa_opendata_address;
+  values:
+- name: VACUUM gisowner.coa_opendata_address
+  text: VACUUM ANALYZE gisowner.coa_opendata_address;
+  values:
+- name: reindex gisowner.coa_opendata_address_hold
+  text: REINDEX TABLE gisowner.coa_opendata_address;
+  values:
+- name: VACUUM gisowner.coa_opendata_address_hold
+  text: VACUUM ANALYZE gisowner.coa_opendata_address_hold;
+  values:
