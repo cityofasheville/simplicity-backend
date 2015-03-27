@@ -8,7 +8,9 @@ The simplicity backend powers the [simplicity ui](https://github.com/cityofashev
 * Verifies correct schema for data **TODO**.
 * Compiles spatial queries in advance **TODO**.
 * Can checks data consistency to ensure simplicity app will work properly.
-* Can run database maintenance.
+  * Framework in place
+  * Does Nothing
+* Can run database maintenance routines i.e. reindex, vacuum, etc .
 
 ##Installing
 ```sh
