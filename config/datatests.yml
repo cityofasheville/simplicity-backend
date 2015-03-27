@@ -1,7 +1,7 @@
 testname: address
 staggingTable: address_hold
 productionTable: address
-test:
+tests:
 - name: count address
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_address_hold;
   values: [1000000]

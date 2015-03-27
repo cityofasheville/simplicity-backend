@@ -21,7 +21,7 @@ var dbObj = yaml.load(program.databaseconn);
 //pass as argument?
 if (program.datatest) {
     var dataTests = yaml.load(program.datatest);
-    var dataTestsObj = dataTests.test;
+    var dataTestsObj = dataTests.tests;
     var datatestcheck = true;
 }
 //pass as argument?
