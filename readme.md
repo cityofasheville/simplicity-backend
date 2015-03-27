@@ -78,7 +78,7 @@ edit `config/maintenance.yml` and update with your settings.
 testname: table1 tests
 staggingTable: table1_hold
 productionTable: table1
-test:
+tests:
 - name: count table1
   text: SELECT count(*) > $1 as check FROM table1;
   values: [1000000]
