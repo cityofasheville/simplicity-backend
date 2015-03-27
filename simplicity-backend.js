@@ -43,11 +43,6 @@ var clientError = function (err) {
 
 var queryRow = function (row, result) {
     'use strict';
-    if (dataTests.testname) {
-        console.log(dataTests.testname);
-        console.log(dataTests.staggingTable);
-        console.log(dataTests.productionTable);
-    }
     if (row.hasOwnProperty('check')) {
         if (row.check) {
             console.log(this.name + ' PASSED.');
@@ -69,7 +64,9 @@ var queryEnd = function (result) {
 
 var clientDrain = function () {
     'use strict';
-    console.log(datatestcheck);
+    if (program.datatest) {
+          console.log(dataTests.testname + ' Test Result: ' + datatestcheck);
+    }
     client.end();
 };
 

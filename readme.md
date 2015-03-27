@@ -75,13 +75,16 @@ edit `config/maintenance.yml` and update with your settings.
 
 #####Example Data Tests Configuration
 ```yaml
-sql:
+testname: table1 tests
+staggingTable: table1_hold
+productionTable: table1
+test:
 - name: count table1
-  text: SELECT count(*) > $1 as check FROM postgres.table1;
+  text: SELECT count(*) > $1 as check FROM table1;
   values: [1000000]
-- name: count table2
-  text: SELECT count(*) = $1 as check FROM postgres.table2;
-  values: [12345]
+- name: type table1
+  text: SELECT DISTINCT COUNT(type) OVER() > $1 as check FROM table1 GROUP BY type HAVING COUNT(type) > 0 ;
+  values: [5]
 ```
 
 ##Running
