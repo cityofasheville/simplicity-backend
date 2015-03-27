@@ -85,7 +85,7 @@ sql:
 ##Running
 ```
 
-Usage: app [options]
+Usage: simplicity-backend [options]
 
  Options:
 
@@ -98,7 +98,7 @@ Usage: app [options]
 running:
 
 ```sh
-$ node app.js -d config/db.yml -t config/datatests.yml
+$ node simplicity-backend.js -d config/db.yml -t config/datatests.yml
 ```
 
 returns:
