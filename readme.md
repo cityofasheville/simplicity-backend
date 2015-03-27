@@ -109,7 +109,7 @@ $ node simplicity-backend.js -d config/db.yml -t config/datatests.yml
 returns:
 
 ```
-count TABLE1 FAILED.
+count table1 FAILED.
 type table1 PASSED.
 table1 tests Test Result: false
 ```
