@@ -9,7 +9,8 @@ The simplicity backend powers the [simplicity ui](https://github.com/cityofashev
 * Compiles spatial queries in advance **TODO**.
 * Checks data consistency to ensure simplicity app will work properly.
   * Framework in place
-  * Does Nothing
+  * Does Nothing yet
+  * Will not push data from hold tables to production tables until data checks PASS.
 * Runs database maintenance routines i.e. reindex, vacuum, etc .
 
 ##Installing
