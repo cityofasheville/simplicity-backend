@@ -3,9 +3,9 @@
 The simplicity backend powers the [simplicity ui](https://github.com/cityofasheville/simplicity-ui) and [simplicity app](http://cityofasheville.github.io/simplicity-ui)
 
 ##What the backend accomplishes.
-* Processes data into the format the simplicity ui expects.
-* Verifies correct schema for data.
-* Compiles spatial queries in advance.
+* Processes data into the format the simplicity ui expects **TODO**.
+* Verifies correct schema for data **TODO**.
+* Compiles spatial queries in advance **TODO**.
 * Can checks data consistency to ensure simplicity app will work properly.
 * Can run database maintenance.
 
