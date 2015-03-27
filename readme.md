@@ -15,65 +15,68 @@ $ git clone https://github.com/cityofasheville/simplicity-backend.git
 $ cd simplicity-backend
 $ npm install
 ```
+
 ##Setup
 
-  ###database connection
-  ```sh
-  $ cp db-sample.yml config/db.yml
-  ```
-  **Warning:** naming this file anything but db.yml will push the database configuration including the password to github on a git push.
+###database connection
+```sh
+$ cp db-sample.yml config/db.yml
+```
+**Warning:** naming this file anything but db.yml will push the database configuration including the password to github on a git push.
 
-  edit `config/db.yml` and update with your settings.
+edit `config/db.yml` and update with your settings.
 
-  ```sh
-  $ cp datatests-sample.yml config/db.yml
-  ```
-  #####example database configuration
-  of course change to match your postgres settings.
-  ```yaml
-  host: 192.162.0.1
-  database: postgres
-  user: postgres
-  password: postgres
-  ```
+```sh
+$ cp datatests-sample.yml config/db.yml
+```
 
-  ####maintenance configuration
-  ```sh
-  $ cp maintenance-sample.yml config/maintenance.yml
-  ```
+#####example database configuration
+of course change to match your postgres settings.
+```yaml
+host: 192.162.0.1
+database: postgres
+user: postgres
+password: postgres
+```
 
-  edit `config/maintenance.yml` and update with your settings.
+####maintenance configuration
+```sh
+$ cp maintenance-sample.yml config/maintenance.yml
+```
 
-  #####example maintenance configuration
-  ```yaml
-  sql:
-  - name: reindex postgres.table1
-    text: REINDEX TABLE postgres.table1;
-    values:
-  - name: VACUUM postgres.table1
-    text: VACUUM ANALYZE postgres.table1;
-    values:
-  ```
+edit `config/maintenance.yml` and update with your settings.
 
-  ####Data Tests Configuration
-  ```sh
-  $ cp datatests-sample.yml config/datatests.yml
-  ```
+#####example maintenance configuration
+```yaml
+sql:
+- name: reindex postgres.table1
+text: REINDEX TABLE postgres.table1;
+values:
+- name: VACUUM postgres.table1
+text: VACUUM ANALYZE postgres.table1;
+values:
+```
 
-  edit `config/maintenance.yml` and update with your settings.
+####Data Tests Configuration
+```sh
+$ cp datatests-sample.yml config/datatests.yml
+```
 
-  *NOTE:*  The SQL statement must have one field that returns a boolean named check.  The SQL statement must return one row.
+edit `config/maintenance.yml` and update with your settings.
 
-  #####Example Data Tests Configuration
-  ```yaml
-  sql:
-  - name: count table1
-    text: SELECT count(*) > $1 as check FROM postgres.table1;
-    values: [1000000]
-  - name: count table2
-    text: SELECT count(*) = $1 as check FROM postgres.table2;
-    values: [12345]
-  ```
+*NOTE:*  The SQL statement must have one field that returns a boolean named check.  The SQL statement must return one row.
+
+#####Example Data Tests Configuration
+```yaml
+sql:
+- name: count table1
+text: SELECT count(*) > $1 as check FROM postgres.table1;
+values: [1000000]
+- name: count table2
+text: SELECT count(*) = $1 as check FROM postgres.table2;
+values: [12345]
+```
+
 ##Running
 ```
 
