@@ -67,7 +67,9 @@ $ cp datatests-sample.yml config/datatests.yml
 
 edit `config/maintenance.yml` and update with your settings.
 
-*NOTE:*  The SQL statement must have one field that returns a boolean named check.  The SQL statement must return one row.
+###*Rule:*!  
+* The SQL statement must have one field that returns a boolean named exactly "check".
+* The SQL statement must return one row.
 
 #####Example Data Tests Configuration
 ```yaml
