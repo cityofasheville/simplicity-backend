@@ -50,11 +50,11 @@ edit `config/maintenance.yml` and update with your settings.
 ```yaml
 sql:
 - name: reindex postgres.table1
-text: REINDEX TABLE postgres.table1;
-values:
+  text: REINDEX TABLE postgres.table1;
+  values:
 - name: VACUUM postgres.table1
-text: VACUUM ANALYZE postgres.table1;
-values:
+  text: VACUUM ANALYZE postgres.table1;
+  values:
 ```
 
 ####Data Tests Configuration
@@ -70,11 +70,11 @@ edit `config/maintenance.yml` and update with your settings.
 ```yaml
 sql:
 - name: count table1
-text: SELECT count(*) > $1 as check FROM postgres.table1;
-values: [1000000]
+  text: SELECT count(*) > $1 as check FROM postgres.table1;
+  values: [1000000]
 - name: count table2
-text: SELECT count(*) = $1 as check FROM postgres.table2;
-values: [12345]
+  text: SELECT count(*) = $1 as check FROM postgres.table2;
+  values: [12345]
 ```
 
 ##Running
