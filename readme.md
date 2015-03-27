@@ -105,7 +105,6 @@ returns:
 
 ```
 count table1 FAILED.
-
 count table2 PASSED.
 ```
 

@@ -49,29 +49,22 @@ var queryRow = function (row, result) {
             console.log(this.name + ' FAILED.');
         }
 
+    } else {
+        console.log();
     }
-
-
 };
 
 var queryEnd = function (result) {
     'use strict';
     //console.log(this.name + '...' + result.rowCount + ' row(s) returned.');
-    console.log('');
+    //console.log('');
 };
 
 client = new pg.Client(dbObj);
 client.on('drain', client.end.bind(client));
 client.connect(clientError);
 
-// for (sql in maintenanceObj) {
-//     if (maintenanceObj.hasOwnProperty(sql)) {
-//         queryConfig = maintenanceObj[sql];
-//         query = client.query(queryConfig, clientError)
-//             .on('row', queryRow)
-//             .on('end', queryEnd);
-//           }
-// }
+//data tests
 if (program.datatest) {
     for (sql in dataTestsObj) {
         if (dataTestsObj.hasOwnProperty(sql)) {
@@ -82,5 +75,19 @@ if (program.datatest) {
         }
     }
 }
-query = client.query('SELECT NOW()', clientError)
+
+//maintenance scripts
+if (program.maintenance) {
+    for (sql in maintenanceObj) {
+        if (maintenanceObj.hasOwnProperty(sql)) {
+            queryConfig = maintenanceObj[sql];
+            query = client.query(queryConfig, clientError)
+                .on('row', queryRow)
+                .on('end', queryEnd);
+        }
+    }
+}
+
+//time query to ensure end client ends
+query = client.query('SELECT NOW()', clientError);
 pg.end();

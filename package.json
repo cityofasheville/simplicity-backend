@@ -18,8 +18,8 @@
     "type": "git",
     "url": "https://github.com/cityofasheville/PSQL-JOBS.git"
   },
-  "author": "",
-  "license": "BSD",
+  "author": "City of Asheville",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/cityofasheville/PSQL-JOBS/issues"
   }
