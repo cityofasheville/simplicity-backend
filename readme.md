@@ -120,6 +120,11 @@ count table2 PASSED.
   * ArcGIS SDE - for use in ArcGIS Server only
   * ESRI based Geocoders
 * Node.js
+  * "pg": "~4.3.0"
+  * "yamljs": "~0.2.1"
+  * "nodemailer": "~1.3.2"
+  * "pg-cursor": "~1.0.0"
+  * "commander": "~2.7.1"
 
 ##License
 
