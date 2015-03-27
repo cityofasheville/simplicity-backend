@@ -1,7 +1,7 @@
 {
-  "name": "PSQL-JOBS",
+  "name": "simplicity-backend",
   "version": "0.0.0",
-  "description": "postgros jobs for managing COA gis servers",
+  "description": "postgres jobs for managing simplicity data",
   "main": "index.js",
   "dependencies": {
     "pg": "~4.3.0",
@@ -16,11 +16,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cityofasheville/PSQL-JOBS.git"
+    "url": "https://github.com/cityofasheville/simplicity-backend.git"
   },
   "author": "City of Asheville",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cityofasheville/PSQL-JOBS/issues"
+    "url": "https://github.com/cityofasheville/simplicity-backend/issues"
   }
 }

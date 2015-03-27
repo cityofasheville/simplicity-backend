@@ -21,7 +21,8 @@ var dbObj = yaml.load(program.databaseconn);
 //pass as argument?
 if (program.datatest) {
     var dataTests = yaml.load(program.datatest);
-    var dataTestsObj = dataTests.sql;
+    var dataTestsObj = dataTests.test;
+    var datatestcheck = true;
 }
 //pass as argument?
 if (program.maintenance) {
@@ -42,11 +43,17 @@ var clientError = function (err) {
 
 var queryRow = function (row, result) {
     'use strict';
+    if (dataTests.testname) {
+        console.log(dataTests.testname);
+        console.log(dataTests.staggingTable);
+        console.log(dataTests.productionTable);
+    }
     if (row.hasOwnProperty('check')) {
         if (row.check) {
             console.log(this.name + ' PASSED.');
         } else {
             console.log(this.name + ' FAILED.');
+            datatestcheck = false;
         }
 
     } else {
@@ -60,8 +67,14 @@ var queryEnd = function (result) {
     //console.log('');
 };
 
+var clientDrain = function () {
+    'use strict';
+    console.log(datatestcheck);
+    client.end();
+};
+
 client = new pg.Client(dbObj);
-client.on('drain', client.end.bind(client));
+client.on('drain', clientDrain);
 client.connect(clientError);
 
 //data tests
