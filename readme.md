@@ -4,6 +4,7 @@ The simplicity backend powers the [simplicity ui](https://github.com/cityofashev
 
 ##What the backend accomplishes.
 * Processes data into the format the simplicity ui expects **TODO**.
+  * still using old method via create-overlays.sh  and sql files in sql/ directory.
 * Verifies correct schema for data **TODO**.
 * Compiles spatial queries in advance **TODO**.
 * Can checks data consistency to ensure simplicity app will work properly.
