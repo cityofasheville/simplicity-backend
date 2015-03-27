@@ -7,10 +7,10 @@ The simplicity backend powers the [simplicity ui](https://github.com/cityofashev
   * still using old method via create-overlays.sh  and sql files in sql/ directory.
 * Verifies correct schema for data **TODO**.
 * Compiles spatial queries in advance **TODO**.
-* Can checks data consistency to ensure simplicity app will work properly.
+* Checks data consistency to ensure simplicity app will work properly.
   * Framework in place
   * Does Nothing
-* Can run database maintenance routines i.e. reindex, vacuum, etc .
+* Runs database maintenance routines i.e. reindex, vacuum, etc .
 
 ##Installing
 ```sh
