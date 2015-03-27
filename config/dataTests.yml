@@ -1,7 +1,7 @@
 sql:
 - name: count address
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_address_hold;
-  values: [10000]
+  values: [1000000]
 - name: count properties
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_property_hold;
   values: [10000]

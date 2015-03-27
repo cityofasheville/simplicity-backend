@@ -1,21 +1,33 @@
 var yaml = require('yamljs');
 var pg = require('pg');
 var Cursor = require('pg-cursor');
+var program = require('commander');
+
+//args
+program
+    .version('0.0.1')
+    .usage('[options] ')
+    .option('-d, --databaseconn <file>', 'PostGres database connection file <file> default is config/db.yml', String, 'config/db.yml')
+    .option('-m, --maintenance <file>', 'maintenance configuration file <file>', String)
+    .option('-t, --datatest <file>', 'data test configuration file <file>', String)
+    .parse(process.argv);
 
 // Load yaml file using YAML.load
 // do not change the name of database connection file db.yml
 // or it will be pushed to gitHub :-(
 //may move this as argument 1
-var dbObj = yaml.load('config/db.yml');
+var dbObj = yaml.load(program.databaseconn);
 
 //pass as argument?
-var dataTests = yaml.load('config/dataTests.yml');
-var dataTestsObj = dataTests.sql;
-
+if (program.datatest) {
+    var dataTests = yaml.load(program.datatest);
+    var dataTestsObj = dataTests.sql;
+}
 //pass as argument?
-var maintenance = yaml.load('config/maintenance.yml');
-var maintenanceObj = maintenance.sql;
-
+if (program.maintenance) {
+    var maintenance = yaml.load(program.maintenance);
+    var maintenanceObj = maintenance.sql;
+}
 var sql;
 var client;
 var query;
@@ -60,14 +72,15 @@ client.connect(clientError);
 //             .on('end', queryEnd);
 //           }
 // }
-
-for (sql in dataTestsObj) {
-    if (dataTestsObj.hasOwnProperty(sql)) {
-        queryConfig = dataTestsObj[sql];
-        query = client.query(queryConfig, clientError)
-            .on('row', queryRow)
-            .on('end', queryEnd);
+if (program.datatest) {
+    for (sql in dataTestsObj) {
+        if (dataTestsObj.hasOwnProperty(sql)) {
+            queryConfig = dataTestsObj[sql];
+            query = client.query(queryConfig, clientError)
+                .on('row', queryRow)
+                .on('end', queryEnd);
+        }
     }
 }
-
+query = client.query('SELECT NOW()', clientError)
 pg.end();
