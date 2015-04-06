@@ -23,6 +23,7 @@ if (program.datatest) {
     var dataTests = yaml.load(program.datatest);
     var dataTestsObj = dataTests.tests;
     var datatestcheck = true;
+    var checkrun = false;
 }
 //pass as argument?
 if (program.maintenance) {
@@ -32,6 +33,7 @@ if (program.maintenance) {
 var sql;
 var client;
 var query;
+var checkQuery;
 var queryConfig = {};
 
 var clientError = function (err) {
@@ -65,7 +67,17 @@ var queryEnd = function (result) {
 var clientDrain = function () {
     'use strict';
     if (program.datatest) {
-          console.log(dataTests.testname + ' Test Result: ' + datatestcheck);
+        if (!checkrun) {
+            console.log(dataTests.testname + ' Test Result: ' + datatestcheck);
+        }
+        if (datatestcheck && !checkrun) {
+            checkrun = true;
+            console.log(dataTests.sql);
+            client.query(dataTests.sql, clientError)
+                .on('row', queryRow)
+                .on('end', queryEnd);
+        }
+
     }
     client.end();
 };
