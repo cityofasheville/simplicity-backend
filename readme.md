@@ -78,7 +78,7 @@ edit `config/maintenance.yml` and update with your settings.
 testname: test name
 onsuccess:
 - name: TEST successful step 1
-  text: truncate table 1
+  text: TRUNCATE TABLE table1;
   values:
 - name: TEST successful step 2
   text: INSERT INTO table1 (SELECT * FROM table1_stagging);
