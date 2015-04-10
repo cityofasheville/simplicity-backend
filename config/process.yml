@@ -1,0 +1,7 @@
+sql:
+- name: truncate buffers
+  text: select now(); #TRUNCATE gisowner.coa_address_buffers_cache_hold;
+  values:
+- name: create buffers
+  text: select now() #INSERT INTO gisowner.coa_address_buffers_cache_hold (SELECT (row_number() OVER (ORDER BY (SHAPE)))::integer as objectid, distance, civicaddress_id, shape FROM gisowner.coa_address_buffers_view_hold ORDER BY distance DESC);
+  values:

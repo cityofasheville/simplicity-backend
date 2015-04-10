@@ -75,9 +75,14 @@ edit `config/maintenance.yml` and update with your settings.
 
 #####Example Data Tests Configuration
 ```yaml
-testname: table1 tests
-staggingTable: table1_hold
-productionTable: table1
+testname: test name
+onsuccess:
+- name: TEST successful step 1
+  text: truncate table 1
+  values:
+- name: TEST successful step 2
+  text: INSERT INTO table1 (SELECT * FROM table1_stagging);
+  values:
 tests:
 - name: count table1
   text: SELECT count(*) > $1 as check FROM table1;

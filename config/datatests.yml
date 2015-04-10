@@ -1,11 +1,15 @@
 testname: address
-staggingTable: address_hold
-productionTable: address
-sql: SELECT * FROM gisowner.coa_opendata_address_hold limit 1;
+onsuccess:
+- name: truncate
+  text: SELECT * FROM gisowner.coa_opendata_address_hold limit 1;
+  values:
+- name: insert
+  text: SELECT * FROM gisowner.coa_opendata_address_hold limit 2;
+  values:
 tests:
 - name: count address
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_address_hold;
-  values: [10000]
+  values: [10000000]
 - name: count properties
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_property_hold;
   values: [10000]

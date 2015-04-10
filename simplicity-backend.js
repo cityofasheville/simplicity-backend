@@ -32,6 +32,7 @@ if (program.maintenance) {
 }
 var sql;
 var client;
+var successClient;
 var query;
 var checkQuery;
 var queryConfig = {};
@@ -60,31 +61,47 @@ var queryRow = function (row, result) {
 
 var queryEnd = function (result) {
     'use strict';
-    //console.log(this.name + '...' + result.rowCount + ' row(s) returned.');
+    console.log(this.name + '...' + result.rowCount + ' row(s) returned.');
     //console.log('');
+};
+
+var successDrain = function () {
+  'use strict';
+  successClient.end();
 };
 
 var clientDrain = function () {
     'use strict';
+    client.end();
     if (program.datatest) {
         if (!checkrun) {
-            console.log(dataTests.testname + ' Test Result: ' + datatestcheck);
+            console.log(dataTests.testname + ' Test Results: ' + datatestcheck);
         }
         if (datatestcheck && !checkrun) {
-            checkrun = true;
-            console.log(dataTests.sql);
-            client.query(dataTests.sql, clientError)
-                .on('row', queryRow)
-                .on('end', queryEnd);
+            console.log(dataTests.testname + ' Test Results: ' + datatestcheck);
+            var sqlcommands = dataTests.onsuccess
+            for (sql in sqlcommands) {
+                successClient = new pg.Client(dbObj);
+                successClient.on('drain', successDrain);
+                successClient.connect(clientError);
+                if (sqlcommands.hasOwnProperty(sql)) {
+                    console.log(sqlcommands[sql]);
+                    checkrun = true;
+                    successClient.query(sqlcommands[sql], clientError)
+                        .on('row', queryRow)
+                        .on('end', queryEnd);
+                    console.log('break');
+                }
+            }
         }
-
     }
-    client.end();
 };
 
 client = new pg.Client(dbObj);
 client.on('drain', clientDrain);
 client.connect(clientError);
+
+
 
 //data tests
 if (program.datatest) {
