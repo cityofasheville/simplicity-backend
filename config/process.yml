@@ -3,10 +3,30 @@ count:
   text: SELECT count(*) as count FROM gisowner.coa_opendata_address_hold;
   values:
 increment: 1000
-sql:
+sleep: 1000
+control:
 - name: truncate buffers
-  text: select now(); #TRUNCATE gisowner.coa_address_buffers_cache_hold;
+  text: TRUNCATE gisowner.coa_address_buffers_cache_hold;
   values:
 - name: create buffers
+  text: INSERT INTO gisowner.coa_address_buffers_cache_hold (SELECT (row_number() OVER (ORDER BY (SHAPE)))::integer as objectid, distance, civicaddress_id, shape FROM gisowner.coa_address_buffers_view_hold ORDER BY distance DESC);
+  values:
+- name: vaucum
+  text: VACUUM ANALYZE gisowner.coa_address_buffers_cache_hold
+  values:
+- name: reindex
+  text: REINDEX TABLE gisowner.coa_address_buffers_cache_hold;
+controlcheck:
+- name: check buffers
+  text: select now();
+  values:
+- name:  count distances
+  text: select now():
+  values:
+sql:
+- name: crime
+  text: select now(); #TRUNCATE gisowner.coa_address_buffers_cache_hold;
+  values:
+- name: proprty
   text: select now(); #INSERT INTO gisowner.coa_address_buffers_cache_hold (SELECT (row_number() OVER (ORDER BY (SHAPE)))::integer as objectid, distance, civicaddress_id, shape FROM gisowner.coa_address_buffers_view_hold ORDER BY distance DESC);
   values:

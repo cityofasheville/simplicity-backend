@@ -2,7 +2,7 @@ var yaml = require('yamljs');
 var pg = require('pg');
 var Cursor = require('pg-cursor');
 var program = require('commander');
-
+var cnt=0;
 //args
 program
     .version('0.0.1')
@@ -39,8 +39,20 @@ if (program.buildcache) {
     var buildcache = yaml.load(program.buildcache);
     var buildcacheObj = buildcache.sql;
     var buildcacheCntObj = buildcache.count;
+    var buildcacheCntrlObj = buildcache.control;
     var buildcacheINC = buildcache.increment;
+    var buildcacheSleep = buildcache.sleep;
+    var buildcacheChecksObj = buildcache.controlcheck;
+    var checkpass = true;
 }
+
+
+var sleep = function (milliSeconds) {
+    'use strict';
+    var startTime = new Date().getTime(); // get the current time
+    while (new Date().getTime() < startTime + milliSeconds) {
+    }
+};
 
 var sql;
 var client;
@@ -56,6 +68,18 @@ var clientError = function (err) {
     }
 };
 
+//when query ends
+var queryEnd = function (result) {
+    'use strict';
+    //console.log(this.name + '...' + result.rowCount + ' row(s) returned.');
+    //console.log('');
+};
+
+var successDrain = function () {
+        'use strict';
+        successClient.end();
+    };
+
 var queryRow = function (row, result) {
     'use strict';
     if (row.hasOwnProperty('check')) {
@@ -65,7 +89,6 @@ var queryRow = function (row, result) {
             console.log(this.name + ' FAILED.');
             datatestcheck = false;
         }
-
     } else {
         console.log();
     }
@@ -74,43 +97,25 @@ var queryRow = function (row, result) {
 var queryBuildRow = function (row, result) {
     'use strict';
     if (row.count) {
-        var cnt = row.count;
+        cnt = row.count;
         if (cnt <  1) {
-           console.error('Building cache requires results from the count query.');
-        }else {
-           console.log('total address count: ' + cnt);
-           buildCache(cnt);
+            console.error('Building cache requires results from the count query.');
+        } else {
+            console.log('total address count: ' + cnt);
+            //buildBuffer();
+            //checkControl();
+            buildCache(cnt);
         }
 
-    }else {
+    } else {
         console.error('Must have a column named count!');
     }
 };
 
-var buildCache = function(cnt) {
-  successClient = new pg.Client(dbObj);
-  successClient.on('drain', successDrain);
-  successClient.connect(clientError);
-  for (sql in buildcacheObj) {
-      if (buildcacheObj.hasOwnProperty(sql)) {
-          console.log(buildcacheObj[sql]);
-          console.log('break');
-          successClient.query(buildcacheObj[sql], clientError)
-              .on('row', queryRow)
-              .on('end', queryEnd);
-      }
-  }
-}
-
-var queryEnd = function (result) {
+var BufferDrain = function (){
     'use strict';
-    console.log(this.name + '...' + result.rowCount + ' row(s) returned.');
-    //console.log('');
-};
-
-var successDrain = function () {
-  'use strict';
-  successClient.end();
+    buildCache(cnt);
+    client.end();
 };
 
 //drain for main client.
@@ -125,7 +130,7 @@ var clientDrain = function () {
         }
         if (datatestcheck && !checkrun) {
             console.log(dataTests.testname + ' Test Results: ' + datatestcheck);
-            var sqlcommands = dataTests.onsuccess
+            var sqlcommands = dataTests.onsuccess;
             for (sql in sqlcommands) {
                 if (sqlcommands.hasOwnProperty(sql)) {
                     successClient = new pg.Client(dbObj);
@@ -141,6 +146,60 @@ var clientDrain = function () {
         }
     }
 };
+
+
+var checkControl = function () {
+  'use strict';
+  successClient = new pg.Client(dbObj);
+  successClient.on('drain', successDrain);
+  successClient.connect(clientError);
+  //build controls - buffers
+  for (sql in buildcacheChecksObj) {
+      console.log('***check***');
+      console.log(buildcacheChecksObj[sql]);
+      console.log('***');
+      successClient.query('select now();', clientError)
+          .on('row', queryRow)
+          .on('end', queryEnd);
+  }
+};
+
+var buildBuffer = function () {
+    'use strict';
+    successClient = new pg.Client(dbObj);
+    successClient.on('drain', BufferDrain);
+    successClient.connect(clientError);
+    //build controls - buffers
+    for (sql in buildcacheCntrlObj) {
+        successClient.query(buildcacheCntrlObj[sql], clientError)
+            .on('row', queryRow)
+            .on('end', queryEnd);
+    }
+};
+
+//build the data cache
+var buildCache = function (cnt) {
+  'use strict';
+  successClient = new pg.Client(dbObj);
+  successClient.on('drain', successDrain);
+  successClient.connect(clientError);
+  var i=0;
+  for (i = 0; i < cnt; i += buildcacheINC) {
+
+      console.log('break-' + i);
+      sleep(buildcacheSleep);
+      for (sql in buildcacheObj) {
+          if (buildcacheObj.hasOwnProperty(sql)) {
+              console.log(buildcacheObj[sql]);
+              successClient.query('select now();', clientError);
+      //        successClient.query(buildcacheObj[sql], clientError)
+      //            .on('row', queryRow)
+      //            .on('end', queryEnd);
+          }
+      }
+  }
+};
+
 
 //rollback function
 var rollback = function (client, done) {
