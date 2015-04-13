@@ -2,7 +2,7 @@ var yaml = require('yamljs');
 var pg = require('pg');
 var Cursor = require('pg-cursor');
 var program = require('commander');
-var cnt=0;
+var cnt = 0;
 //args
 program
     .version('0.0.1')
@@ -42,6 +42,7 @@ if (program.buildcache) {
     var buildcacheCntrlObj = buildcache.control;
     var buildcacheINC = buildcache.increment;
     var buildcacheSleep = buildcache.sleep;
+    var buildcacheDistances = buildcache.distances;
     var buildcacheChecksObj = buildcache.controlcheck;
     var checkpass = true;
 }
@@ -68,17 +69,44 @@ var clientError = function (err) {
     }
 };
 
+var scCE = function (err) {
+    'use strict';
+    if (err) {
+        console.error("Error: %s", err);
+    }
+};
+
 //when query ends
 var queryEnd = function (result) {
     'use strict';
     //console.log(this.name + '...' + result.rowCount + ' row(s) returned.');
-    //console.log('');
 };
 
 var successDrain = function () {
         'use strict';
         successClient.end();
-    };
+};
+
+
+var sd = function () {
+        'use strict';
+        successClientc.end();
+};
+
+
+var scqr = function (row, result) {
+    console.log(row);
+};
+
+var scend = function (result) {
+    'use strict';
+    sleep(buildcacheSleep);
+    //console.log(result.command);
+    //console.log('SC END');
+    console.log(this.name + '...' + result.rowCount + ' row(s) returned.');
+    //console.log(this.acount);
+};
+
 
 var queryRow = function (row, result) {
     'use strict';
@@ -90,7 +118,7 @@ var queryRow = function (row, result) {
             datatestcheck = false;
         }
     } else {
-        console.log();
+        //console.log();
     }
 };
 
@@ -102,9 +130,9 @@ var queryBuildRow = function (row, result) {
             console.error('Building cache requires results from the count query.');
         } else {
             console.log('total address count: ' + cnt);
-            //buildBuffer();
+            buildBuffer();
             //checkControl();
-            buildCache(cnt);
+            //buildCache(cnt);
         }
 
     } else {
@@ -112,10 +140,10 @@ var queryBuildRow = function (row, result) {
     }
 };
 
-var BufferDrain = function (){
+var BufferDrain = function () {
     'use strict';
+    sc.end();
     buildCache(cnt);
-    client.end();
 };
 
 //drain for main client.
@@ -131,6 +159,7 @@ var clientDrain = function () {
         if (datatestcheck && !checkrun) {
             console.log(dataTests.testname + ' Test Results: ' + datatestcheck);
             var sqlcommands = dataTests.onsuccess;
+            var sql;
             for (sql in sqlcommands) {
                 if (sqlcommands.hasOwnProperty(sql)) {
                     successClient = new pg.Client(dbObj);
@@ -149,55 +178,81 @@ var clientDrain = function () {
 
 
 var checkControl = function () {
-  'use strict';
-  successClient = new pg.Client(dbObj);
-  successClient.on('drain', successDrain);
-  successClient.connect(clientError);
-  //build controls - buffers
-  for (sql in buildcacheChecksObj) {
-      console.log('***check***');
-      console.log(buildcacheChecksObj[sql]);
-      console.log('***');
-      successClient.query('select now();', clientError)
-          .on('row', queryRow)
-          .on('end', queryEnd);
-  }
-};
-
-var buildBuffer = function () {
     'use strict';
     successClient = new pg.Client(dbObj);
-    successClient.on('drain', BufferDrain);
+    successClient.on('drain', successDrain);
     successClient.connect(clientError);
     //build controls - buffers
+    var sql;
+    for (sql in buildcacheChecksObj) {
+        if (buildcacheChecksObj.hasOwnProperty(sql)) {
+            console.log('***check***');
+            console.log(buildcacheChecksObj[sql]);
+            console.log('***');
+            successClient.query('select now();', clientError)
+                .on('row', queryRow)
+                .on('end', queryEnd);
+        }
+    }
+};
+
+var sc;
+var buildBuffer = function () {
+    'use strict';
+    sc = new pg.Client(dbObj);
+    sc.on('drain', BufferDrain);
+    sc.connect(clientError);
+    //build controls - buffers
     for (sql in buildcacheCntrlObj) {
-        successClient.query(buildcacheCntrlObj[sql], clientError)
+        //sc.query(buildcacheCntrlObj[sql], scCE)
+        sc.query('SELECT NOW();', scCE)
             .on('row', queryRow)
             .on('end', queryEnd);
     }
 };
 
+var successClientc;
 //build the data cache
 var buildCache = function (cnt) {
-  'use strict';
-  successClient = new pg.Client(dbObj);
-  successClient.on('drain', successDrain);
-  successClient.connect(clientError);
-  var i=0;
-  for (i = 0; i < cnt; i += buildcacheINC) {
+    'use strict';
+    successClientc = new pg.Client(dbObj);
+    successClientc.on('drain', sd);
+    successClientc.connect(clientError);
+    var i = 0;
+    var sqlbc;
+    for (i = 0; i < cnt; i += buildcacheINC) {
+        //console.log('break-' + i);
+        //sleep(buildcacheSleep);
 
-      console.log('break-' + i);
-      sleep(buildcacheSleep);
-      for (sql in buildcacheObj) {
-          if (buildcacheObj.hasOwnProperty(sql)) {
-              console.log(buildcacheObj[sql]);
-              successClient.query('select now();', clientError);
-      //        successClient.query(buildcacheObj[sql], clientError)
-      //            .on('row', queryRow)
-      //            .on('end', queryEnd);
-          }
-      }
-  }
+        for (sqlbc in buildcacheObj) {
+            if (buildcacheObj.hasOwnProperty(sqlbc)) {
+                //console.log(buildcacheDistances)
+                var dist;
+                var theDist;
+                var theName;
+                var bcConfig;
+                buildcacheDistances =  buildcacheObj[sqlbc].distances
+                for (dist in buildcacheDistances){
+                    if (buildcacheDistances.hasOwnProperty(dist)) {
+                        theDist = buildcacheDistances[dist];
+                        theName = buildcacheObj[sqlbc].name;
+                        //console.log(buildcacheDistances[dist]);
+                        //console.log(buildcacheObj[sqlbc].text);
+                        bcConfig = {
+                                      acount: cnt,
+                                      ai: i,
+                                      name: theName ,
+                                      text: buildcacheObj[sqlbc].text,
+                                      values: [buildcacheINC,i,theDist]
+                                    };
+                        successClientc.query(bcConfig, clientError)
+                           .on('row', scqr)
+                           .on('end', scend);
+                    }
+                }
+            }
+        }
+    }
 };
 
 
