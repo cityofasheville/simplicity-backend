@@ -3,6 +3,8 @@ var pg = require('pg');
 var Cursor = require('pg-cursor');
 var program = require('commander');
 var cnt = 0;
+pg.defaults.poolsize = 25;
+
 //args
 program
     .version('0.0.1')
