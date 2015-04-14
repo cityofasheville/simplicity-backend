@@ -104,11 +104,194 @@ Usage: simplicity-backend [options]
    -d, --databaseconn <file>  PostGres database connection file <file> default is config/db.yml
    -m, --maintenance <file>   maintenance configuration file <file>
    -t, --datatest <file>      data test configuration file <file>
+   -c, --buildcache <file>    data test configuration file <file>
 ```
 running:
 
 ```sh
 $ node simplicity-backend.js -d config/db.yml -t config/datatests.yml
+```
+
+returns:
+
+```
+count table1 FAILED.
+type table1 PASSED.
+table1 tests Test Result: false
+```
+
+
+####Build Cache Configuration
+```sh
+$ cp process-sample.yml config/process.yml
+```
+
+edit `config/process.yml` and update with your settings.
+
+###*Rule:*  
+* The Count SQL statement must have one field that returns a integer named exactly "count".
+* The Count SQL statement must return a number greater than 1.
+*Awesomes there is a view that takes care of buffers*
+
+In this sample 2264 is the projection of NC State Plane.  Adjust the the Projection code to match your projections code.
+
+#####Sampel view DDL
+```sql
+CREATE OR REPLACE VIEW postgres.locations_view_hold  AS
+ 	SELECT
+ 	  st_transform(ST_Buffer(st_transform(shape, 2264),1320),4326)::geometry shape,
+ 	  1320::numeric(10,4) as distance,
+ 	  objectid,
+ 	  locationid
+ 	FROM postgres.locations_table1_hold
+       UNION
+	SELECT
+	  st_transform(ST_Buffer(st_transform(shape, 2264),660),4326)::geometry shape,
+	  660::numeric(10,4) as distance,
+	  objectid,
+    locationid
+	FROM postgres.locations_table1_hold
+      UNION
+	SELECT
+	  st_transform(ST_Buffer(st_transform(shape, 2264),330),4326)::geometry shape,
+	  330::numeric(10,4) as distance,
+	  objectid,
+    locationid
+	FROM postgres.locations_table1_hold
+      UNION
+	SELECT
+	  st_transform(ST_Buffer(st_transform(shape, 2264),165),4326)::geometry shape,
+	  165::numeric(10,4) as distance,
+	  objectid,
+    locationid
+	FROM postgres.locations_table1_hold
+      UNION
+	SELECT
+	  st_transform(ST_Buffer(st_transform(shape, 2264),82.5),4326)::geometry shape,
+	  82.5::numeric(10,4) as distance,
+	  objectid,
+    locationid
+	FROM postgres.locations_table1_hold;
+```
+
+#####Example Build Cache Configuration
+count - counts the number of locations or addresses in the location table
+
+increment - number of locationids to process at a time.  With limited testing I have seen 100 to give great results
+
+sleep - in some cases depending on server resources I have seen the process time actually improve by increaseing this. around 1 - 3 seconds seems to work best.  the number is milliseconds. So 1 second is 1000.
+
+Control - this is used to create the buffer layer.  Data will process once this section is complete
+
+Controlcheck - quick check to make sure buffer data is valid and was created succesfully. Data will not pricess untill checks are passed.
+
+###*Rule:*  
+* The SQL statement must have one field that returns a boolean named exactly "check".
+* The SQL statement must return one row
+
+SQL - SQL statments to collect data for each buffer.
+needs distances to create entries for each distance.  a distance of [0] indicates no buffers used.
+
+```yaml
+count:
+- name: count
+  text: SELECT count(*) as count FROM postgres.locations_table1_hold;
+  values:
+increment: 100
+sleep: 0
+distances: [10]
+control:
+- name: truncate buffers
+  text: TRUNCATE table postgres.locations_buffers_cache_hold;
+  values:
+- name: create buffers
+  text: INSERT INTO postgres.locations_buffers_cache_hold (SELECT (row_number() OVER (ORDER BY (SHAPE)))::integer as objectid, distance, locationid, shape FROM postgres.postgres ORDER BY distance DESC);
+  values:
+- name: vaucum buffers
+  text: VACUUM ANALYZE postgres.locations_buffers_cache_hold
+  values:
+- name: reindex buffers
+  text: REINDEX TABLE postgres.locations_buffers_cache_hold;
+  values:
+- name: clear cache
+  text: TRUNCATE TABLE postgres.data_cache_hold;
+  values:
+- name: Resequence Cache HOLD
+  text: ALTER SEQUENCE postgres.data_cache_hold_objectid_seq RESTART WITH 1;;
+  values:
+- name: ReIndex Buffer Shapes
+  text: REINDEX INDEX postgres.locations_buffers_cache_hold_shape;
+  values:
+- name: ReIndex Neighborhood Shapes
+  text: REINDEX INDEX postgres.neighborhoods_hold_shape;
+  values:
+- name: ReIndex City Limits Shapes
+  text: REINDEX INDEX postgres.city_limits_hold_shape;
+  values:
+- name: ReIndex Crime Shapes
+  text: REINDEX INDEX postgres.crime_hold_shape;
+  values:
+- name: ReIndex Permit Shapes
+  text: REINDEX INDEX postgres.permits_hold_shape;
+  values:
+- name: ReIndex Property Shapes
+  text: REINDEX INDEX postgres.property_hold_shape;
+  values:
+- name: ReIndex Sanitation Shapes
+  text: REINDEX INDEX postgres.sanitation_districts_hold_shape;
+  values:
+- name: ReIndex Sanitation Shapes
+  text: REINDEX INDEX postgres.streets_hold_shape;
+  values:
+- name: ReIndex Zoning Shapes
+  text: REINDEX INDEX postgres.zoning_hold_shape;
+  values:
+- name: ReIndex Zoning Overlays Shapes
+  text: REINDEX INDEX postgres.zoning_overlays_hold_shape;
+  values:
+- name: vaucum cache
+  text: VACUUM ANALYZE postgres.data_cache_hold;
+  values:
+controlcheck:
+- name: check buffers
+  text: select now();
+  values:
+- name:  count distances
+  text: select now():
+  values:
+sql:
+- name: Crime
+  text: INSERT INTO postgres.data_cache_hold (SELECT DISTINCT avw.locationid, 'CRIME'::varchar(150) as type, avw.distance as distance, (SELECT string_agg(tp,',')::text FROM (SELECT b.pid::text as tp FROM postgres.crime_hol b WHERE st_contains(avw.shape,b.shape )) as hold)::text as data,''::text datajson FROM gisowner.coa_address_buffers_cache_hold AS avw LEFT JOIN gisowner.coa_address_buffers_cache_hold buf ON buf.locationid = avw.locationid LEFT JOIN gisowner.coa_opendata_address_hold addr ON addr.locationid = buf.locationid WHERE avw.distance = ANY($3::numeric[]) and avw.locationid in (select locationid from gisowner.coa_opendata_address_hold order by locationid limit $1 offset $2))
+  values:
+  distances: [82.5000,660.0000,1320.0000,330.0000,65.0000]
+- name: Permits
+  text: INSERT INTO postgres.data_cache_hold (SELECT DISTINCT avw.locationid,'PERMITS'::varchar(150) as type, avw.distance as distance, (SELECT string_agg(tp,',')::text FROM (SELECT DISTINCT b.apn::text as tp FROM gisowner.coa_opendata_permits_hold b WHERE st_contains(avw.shape,b.shape) ) as hold)::text as data, ''::text datajson FROM gisowner.coa_address_buffers_cache_hold AS avw LEFT JOIN gisowner.coa_address_buffers_cache_hold buf ON buf.locationid = avw.locationid LEFT JOIN gisowner.coa_opendata_address_hold addr ON addr.locationid = buf.locationid WHERE avw.distance = ANY($3::numeric[]) and avw.locationid in (select locationid from gisowner.coa_opendata_address_hold order by locationid limit $1 offset $2))
+  values:
+  distances: [82.5000,660.0000,1320.0000,330.0000,65.0000]
+- name: Address In City
+  text: INSERT INTO postgres.data_cache_hold (SELECT DISTINCT civx.locationid, 'ADDRESS IN CITY'::varchar(150) as type,$3::numeric(38,8) as distance,CASE WHEN (SELECT string_agg(tp,',')::text FROM (SELECT b.jurisdiction_type::text as tp FROM gisowner.coa_opendata_city_limits_hold b WHERE st_intersects(addr.shape,b.shape))  as hold)::varchar(255) like '%Asheville Corporate Limits%' THEN 'YES' ELSE 'NO' END as data FROM gisowner.coa_opendata_property_hold as a LEFT JOIN gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold civx ON civx.pinnum = a.pinnum LEFT JOIN gisowner.coa_opendata_address_hold addr ON addr.locationid = civx.locationid WHERE addr.locationid in (select distinct locationid from gisowner.coa_opendata_address_hold order by locationid limit $1 offset $2));
+  values:
+  distances: [0]
+```
+
+##Running
+```
+
+Usage: simplicity-backend [options]
+
+ Options:
+
+   -h, --help                 output usage information
+   -V, --version              output the version number
+   -d, --databaseconn <file>  PostGres database connection file <file> default is config/db.yml
+   -m, --maintenance <file>   maintenance configuration file <file>
+   -t, --datatest <file>      data test configuration file <file>
+   -c, --buildcache <file>    data test configuration file <file>
+```
+running:
+
+```sh
+$ node simplicity-backend.js -d config/db.yml -c config/processyml
 ```
 
 returns:

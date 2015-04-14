@@ -59,11 +59,11 @@ control:
   values:
 controlcheck:
 - name: check buffers
-  text: select now();
-  values:
+  text: SELECT( (SELECT COUNT(*) FROM gisowner.coa_address_buffers_cache_hold) = (SELECT COUNT(*) FROM gisowner.coa_opendata_address_hold)*$1) as check
+  values: [5]
 - name:  count distances
-  text: select now():
-  values:
+  text: SELECT DISTINCT COUNT(distance) OVER() = $1 as check FROM gisowner.coa_address_buffers_cache_hold GROUP BY distance HAVING COUNT(distance) > 0;
+  values: [5]
 sql:
 - name: Crime
   text: INSERT INTO gisowner.coa_overlay_data_cache_hold (SELECT DISTINCT avw.civicaddress_id, 'CRIME'::varchar(150) as type, avw.distance as distance, (SELECT string_agg(tp,',')::text FROM (SELECT b.pid::text as tp FROM gisowner.coa_opendata_crime_hold b WHERE st_contains(avw.shape,b.shape )) as hold)::text as data,''::text datajson FROM gisowner.coa_address_buffers_cache_hold AS avw LEFT JOIN gisowner.coa_address_buffers_cache_hold buf ON buf.civicaddress_id = avw.civicaddress_id LEFT JOIN gisowner.coa_opendata_address_hold addr ON addr.civicaddress_id = buf.civicaddress_id WHERE avw.distance = ANY($3::numeric[]) and avw.civicaddress_id in (select civicaddress_id from gisowner.coa_opendata_address_hold order by civicaddress_id limit $1 offset $2))
@@ -97,5 +97,3 @@ sql:
   text: DELETE FROM gisowner.coa_overlay_data_cache_hold WHERE data is null and ($3=$3 or $2=$2 or $1=$1)
   values:
   distances: [0]
-
-test:

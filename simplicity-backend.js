@@ -15,14 +15,19 @@ program
     .option('-c, --buildcache <file>', 'data test configuration file <file>', String)
     .parse(process.argv);
 
-// Load yaml file using YAML.load
-// do not change the name of database connection file db.yml
-// or it will be pushed to gitHub :-(
-//may move this as argument 1
-var dbObj = yaml.load(program.databaseconn);
+/**
+  Load yaml file for database connection using YAML.load
+  do not change the name of database connection file db.yml
+  or it will be pushed to gitHub :-(
+**/
+var dataBaseConnectionObject = yaml.load(program.databaseconn);
 
 
-//data tests passed as argument?
+/**
+  data tests passed as argument?
+  if so run the data testests
+  the argiument must be a yaml file 
+**/
 if (program.datatest) {
     var dataTests = yaml.load(program.datatest);
     var dataTestsObj = dataTests.tests;
@@ -216,7 +221,7 @@ var clientDrain = function () {
             var sql;
             for (sql in sqlcommands) {
                 if (sqlcommands.hasOwnProperty(sql)) {
-                    successClient = new pg.Client(dbObj);
+                    successClient = new pg.Client(dataBaseConnectionObject);
                     successClient.on('drain', successDrain);
                     successClient.connect(clientError);
                     console.log(sqlcommands[sql]);
@@ -233,7 +238,7 @@ var clientDrain = function () {
 
 var checkControl = function () {
     'use strict';
-    successClient = new pg.Client(dbObj);
+    successClient = new pg.Client(dataBaseConnectionObject);
     successClient.on('drain', successDrain);
     successClient.connect(clientError);
     //build controls - buffers
@@ -253,7 +258,7 @@ var checkControl = function () {
 var sc;
 var buildBuffer = function () {
     'use strict';
-    sc = new pg.Client(dbObj);
+    sc = new pg.Client(dataBaseConnectionObject);
     sc.on('drain', BufferDrain);
     sc.connect(clientError);
     //build controls - buffers
@@ -270,7 +275,7 @@ var successClientc;
 var buildCache = function (cnt) {
     'use strict';
 
-    successClientc = new pg.Client(dbObj);
+    successClientc = new pg.Client(dataBaseConnectionObject);
     successClientc.on('drain', sd);
     successClientc.connect(clientError);
     var i = 0;
@@ -325,7 +330,7 @@ var rollback = function (client, done) {
     client.end();
 };
 
-client = new pg.Client(dbObj);
+client = new pg.Client(dataBaseConnectionObject);
 client.on('drain', clientDrain);
 client.connect(clientError);
 
