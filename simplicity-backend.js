@@ -49,7 +49,9 @@ if (program.buildcache) {
     var checkpass = true;
 }
 
-
+//sleep function
+//short rest to allow for sql insert to complete
+//found that this actuall increases the speed of inserts
 var sleep = function (milliSeconds) {
     'use strict';
     var startTime = new Date().getTime(); // get the current time
@@ -64,12 +66,14 @@ var query;
 var checkQuery;
 var queryConfig = {};
 
+//generic error callback for client,queryies
 var clientError = function (err) {
     'use strict';
     if (err) {
         console.error("Error: %s", err);
     }
 };
+
 
 var scCE = function (err) {
     'use strict';
@@ -81,53 +85,75 @@ var scCE = function (err) {
 //when query ends
 var queryEnd = function (result) {
     'use strict';
-    //console.log(this.name + '...' + result.rowCount + ' row(s) returned.');
 };
 
 var successDrain = function () {
-        'use strict';
-        successClient.end();
+    'use strict';
+    successClient.end();
 };
 
 
 var sd = function () {
-        'use strict';
-        successClientc.end();
+    'use strict';
+    successClientc.end();
 };
 
 
 var scqr = function (row, result) {
-    //console.log(row);
+    'use strict';
 };
 
 var rowcount = 0;
 var startname = '';
 var dot = '';
+var complete = '';
+/**
+  query for buidling the data cache ends
+**/
 var scend = function (result) {
     'use strict';
+
+    //small stall to increase performance on inserts.
     sleep(buildcacheSleep);
 
+    /**
+      Capture the first named query for iterating the inserted count
+      we will derice the percent complete from this.
+    **/
     if (rowcount === 0) {
-      startname = this.name;
-      rowcount = 1;
+        startname = this.name;
+        rowcount = 1;
     }
+
+    /**
+      iterate the count when we return the first named query
+      this insures that the percent complete is progresses for each
+      N inserts into the cache.
+    **/
     if (startname === this.name){
-      rowcount += buildcacheINC;
-      dot = '';
+
+        rowcount += buildcacheINC;
+        //calculate the percent complete
+        complete = ((rowcount/cnt) * 100).toFixed(2);
+        dot = '';
+        console.log('Processing next ' + buildcacheINC + ' locations, ' + complete + '% completed' + dot);
     } else {
-      dot = dot + '.';
+        dot = dot + '.';
     }
 
-    var complete = ((rowcount/cnt) * 100).toFixed(2);
-    //console.log(result.command);
-    //console.log('SC END');
-    console.log(this.name + '...' + result.rowCount + ' row(s) returned.');
 
-    console.log(complete + '% completed' + dot);
-    //console.log(this.acount);
+
+    //messages for showing progress
+    console.log('  ' + this.name + '...' + result.rowCount + ' row(s) returned.  ' );
 };
 
-
+/**
+  query on row method.
+  for data tests when a row exists named check
+  we use that to determine a pass or fail.
+  when we encounter any fail we change the Tests state to fail with
+  datatestcheck.
+**/
 var queryRow = function (row, result) {
     'use strict';
     if (row.hasOwnProperty('check')) {
@@ -142,20 +168,26 @@ var queryRow = function (row, result) {
     }
 };
 
+/**
+  On Row event for the Building  data proccesing jobs
+**/
 var queryBuildRow = function (row, result) {
     'use strict';
+    //check row count
     if (row.count) {
         cnt = row.count;
+
+        //must have more that one address to work
         if (cnt <  1) {
-            console.error('Building cache requires results from the count query.');
+            console.error('Building a cache requires more than one record in the address table.');
         } else {
             console.log('total address count: ' + cnt);
+            //if more than 1 address build the buffer layer
             buildBuffer();
-            //checkControl();
-            //buildCache(cnt);
         }
 
     } else {
+        //the query to check the number of addresses must have an integer field named count
         console.error('Must have a column named count!');
     }
 };
@@ -166,9 +198,11 @@ var BufferDrain = function () {
     buildCache(cnt);
 };
 
-//drain for main client.
-//when this is a data test this will spawn a new client to
-//handle the sql for updateing the production table
+/**
+    drain for main client.
+    when this is a data test this will spawn a new client to
+    handle the sql for updateing the production table
+**/
 var clientDrain = function () {
     'use strict';
     client.end();
@@ -241,6 +275,11 @@ var buildCache = function (cnt) {
     successClientc.connect(clientError);
     var i = 0;
     var sqlbc;
+    var dist;
+    var theDist;
+    var theName;
+    var bcConfig;
+
     for (i = 0; i < cnt; i += buildcacheINC) {
         //console.log('break-' + i);
         //sleep(buildcacheSleep);
@@ -248,19 +287,14 @@ var buildCache = function (cnt) {
         for (sqlbc in buildcacheObj) {
             if (buildcacheObj.hasOwnProperty(sqlbc)) {
                 //console.log(buildcacheDistances)
-                var dist;
-                var theDist;
-                var theName;
-                var bcConfig;
+
                 buildcacheDistances =  buildcacheObj[sqlbc].distances.join();
                 if ( parseInt(buildcacheDistances) === 0 )  {
                     buildcacheDistances = 0;
                 } else {
                   buildcacheDistances =  buildcacheObj[sqlbc].distances;
                 }
-                //for (dist in buildcacheDistances){
-                    //if (buildcacheDistances.hasOwnProperty(dist)) {
-                        //theDist = buildcacheDistances[dist];
+
                         theDist = buildcacheDistances;
                         theName = buildcacheObj[sqlbc].name;
                         //console.log(buildcacheDistances[dist]);
@@ -316,7 +350,7 @@ if (program.datatest) {
     }
 }
 
-//maintenance scripts
+//maintenance routines
 if (program.maintenance) {
     for (sql in maintenanceObj) {
         if (maintenanceObj.hasOwnProperty(sql)) {
