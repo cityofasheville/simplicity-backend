@@ -97,15 +97,33 @@ var sd = function () {
 
 
 var scqr = function (row, result) {
-    console.log(row);
+    //console.log(row);
 };
 
+var rowcount = 0;
+var startname = '';
+var dot = '';
 var scend = function (result) {
     'use strict';
     sleep(buildcacheSleep);
+
+    if (rowcount === 0) {
+      startname = this.name;
+      rowcount = 1;
+    }
+    if (startname === this.name){
+      rowcount += buildcacheINC;
+      dot = '';
+    } else {
+      dot = dot + '.';
+    }
+
+    var complete = ((rowcount/cnt) * 100).toFixed(2);
     //console.log(result.command);
     //console.log('SC END');
     console.log(this.name + '...' + result.rowCount + ' row(s) returned.');
+
+    console.log(complete + '% completed' + dot);
     //console.log(this.acount);
 };
 
@@ -217,6 +235,7 @@ var successClientc;
 //build the data cache
 var buildCache = function (cnt) {
     'use strict';
+
     successClientc = new pg.Client(dbObj);
     successClientc.on('drain', sd);
     successClientc.connect(clientError);
@@ -233,10 +252,16 @@ var buildCache = function (cnt) {
                 var theDist;
                 var theName;
                 var bcConfig;
-                buildcacheDistances =  buildcacheObj[sqlbc].distances
-                for (dist in buildcacheDistances){
-                    if (buildcacheDistances.hasOwnProperty(dist)) {
-                        theDist = buildcacheDistances[dist];
+                buildcacheDistances =  buildcacheObj[sqlbc].distances.join();
+                if ( parseInt(buildcacheDistances) === 0 )  {
+                    buildcacheDistances = 0;
+                } else {
+                  buildcacheDistances =  buildcacheObj[sqlbc].distances;
+                }
+                //for (dist in buildcacheDistances){
+                    //if (buildcacheDistances.hasOwnProperty(dist)) {
+                        //theDist = buildcacheDistances[dist];
+                        theDist = buildcacheDistances;
                         theName = buildcacheObj[sqlbc].name;
                         //console.log(buildcacheDistances[dist]);
                         //console.log(buildcacheObj[sqlbc].text);
@@ -247,11 +272,12 @@ var buildCache = function (cnt) {
                                       text: buildcacheObj[sqlbc].text,
                                       values: [buildcacheINC,i,theDist]
                                     };
+                        //console.log(bcConfig);
                         successClientc.query(bcConfig, clientError)
                            .on('row', scqr)
                            .on('end', scend);
-                    }
-                }
+                    //}
+                //}
             }
         }
     }
