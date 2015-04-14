@@ -1,9 +1,8 @@
 var yaml = require('yamljs');
 var pg = require('pg');
-var Cursor = require('pg-cursor');
 var program = require('commander');
 var cnt = 0;
-pg.defaults.poolsize = 25;
+pg.defaults.poolsize = 10;
 
 //args
 program
@@ -26,7 +25,7 @@ var dataBaseConnectionObject = yaml.load(program.databaseconn);
 /**
   data tests passed as argument?
   if so run the data testests
-  the argiument must be a yaml file 
+  the argiument must be a yaml file
 **/
 if (program.datatest) {
     var dataTests = yaml.load(program.datatest);
@@ -43,16 +42,41 @@ if (program.maintenance) {
 
 //buildcache data passed as argument?
 if (program.buildcache) {
-    var buildcache = yaml.load(program.buildcache);
-    var buildcacheObj = buildcache.sql;
-    var buildcacheCntObj = buildcache.count;
-    var buildcacheCntrlObj = buildcache.control;
-    var buildcacheINC = buildcache.increment;
-    var buildcacheSleep = buildcache.sleep;
-    var buildcacheDistances = buildcache.distances;
-    var buildcacheChecksObj = buildcache.controlcheck;
-    var checkpass = true;
+    var buildcacheYAML = yaml.load(program.buildcache);
+
+    //objects
+    var buildcacheObj = buildcacheYAML.buildcache;
+    var buildcacheCntObj = buildcacheYAML.count;
+    var buildcacheCntrlObj = buildcacheYAML.buffer;
+    var buildcacheChecksObj = buildcacheYAML.buffercheck;
+
+    //controling variables
+    var buildcacheINC = buildcacheYAML.increment;
+    var buildcacheSleep = buildcacheYAML.sleep;
+    var buildcacheDistances = buildcacheYAML.distances;
+    var buildcacheCheckPass = true;
 }
+
+/**
+  query on row method.
+  for building Cache when a row exists named check
+  we use that to determine a pass or fail.
+  when we encounter any fail we change the Tests state to fail with
+  datatestcheck.
+**/
+var BufferCheck_queryRow = function (row, result) {
+    'use strict';
+    if (row.hasOwnProperty('check')) {
+        if (row.check) {
+            console.log(this.name + ' PASSED.');
+        } else {
+            console.log(this.name + ' FAILED.');
+            buildcacheCheckPass = false;
+        }
+    } else {
+        //console.log();
+    }
+};
 
 //sleep function
 //short rest to allow for sql insert to complete
@@ -60,6 +84,8 @@ if (program.buildcache) {
 var sleep = function (milliSeconds) {
     'use strict';
     var startTime = new Date().getTime(); // get the current time
+
+    //Loop till time change in millisecons matches what was passed in
     while (new Date().getTime() < startTime + milliSeconds) {
     }
 };
@@ -67,6 +93,8 @@ var sleep = function (milliSeconds) {
 var sql;
 var client;
 var successClient;
+var bufferCheck_Client;
+var buildBuffer_Client;
 var query;
 var checkQuery;
 var queryConfig = {};
@@ -173,6 +201,8 @@ var queryRow = function (row, result) {
     }
 };
 
+
+
 /**
   On Row event for the Building  data proccesing jobs
 **/
@@ -197,10 +227,27 @@ var queryBuildRow = function (row, result) {
     }
 };
 
-var BufferDrain = function () {
+var BufferCheck_Drain = function () {
     'use strict';
-    sc.end();
-    buildCache(cnt);
+    bufferCheck_Client.end();
+
+    /**
+      veify checks completed successfully and if so
+      build the cache.
+    **/
+    if(buildcacheCheckPass){
+        console.log('PASSED All Tests, building Cache!');
+        buildCache(cnt);
+    } else {
+        console.log('Failed a test Please Check the log.  Cache cannot be built');
+    }
+};
+
+
+var Buffer_Drain = function () {
+    'use strict';
+    buildBuffer_Client.end();
+    BufferCheck();
 };
 
 /**
@@ -224,7 +271,7 @@ var clientDrain = function () {
                     successClient = new pg.Client(dataBaseConnectionObject);
                     successClient.on('drain', successDrain);
                     successClient.connect(clientError);
-                    console.log(sqlcommands[sql]);
+                    //console.log(sqlcommands[sql]);
                     checkrun = true;
                     successClient.query(sqlcommands[sql], clientError)
                         .on('row', queryRow)
@@ -236,35 +283,35 @@ var clientDrain = function () {
 };
 
 
-var checkControl = function () {
+var BufferCheck = function () {
     'use strict';
-    successClient = new pg.Client(dataBaseConnectionObject);
-    successClient.on('drain', successDrain);
-    successClient.connect(clientError);
+    bufferCheck_Client = new pg.Client(dataBaseConnectionObject);
+    bufferCheck_Client.on('drain', BufferCheck_Drain);
+    bufferCheck_Client.connect(clientError);
     //build controls - buffers
     var sql;
     for (sql in buildcacheChecksObj) {
         if (buildcacheChecksObj.hasOwnProperty(sql)) {
-            console.log('***check***');
-            console.log(buildcacheChecksObj[sql]);
-            console.log('***');
-            successClient.query('select now();', clientError)
-                .on('row', queryRow)
+
+            bufferCheck_Client.query(buildcacheChecksObj[sql], clientError)
+                .on('row', BufferCheck_queryRow)
                 .on('end', queryEnd);
         }
     }
 };
 
-var sc;
+
 var buildBuffer = function () {
     'use strict';
-    sc = new pg.Client(dataBaseConnectionObject);
-    sc.on('drain', BufferDrain);
-    sc.connect(clientError);
+    buildBuffer_Client = new pg.Client(dataBaseConnectionObject);
+    buildBuffer_Client.on('drain', Buffer_Drain);
+    buildBuffer_Client.connect(clientError);
+    console.log('Building Buffers...')
     //build controls - buffers
     for (sql in buildcacheCntrlObj) {
         //sc.query(buildcacheCntrlObj[sql], scCE)
-        sc.query('SELECT NOW();', scCE)
+        //buildBuffer_Client.query('SELECT NOW();', scCE)
+        buildBuffer_Client.query(buildcacheCntrlObj[sql], scCE)
             .on('row', queryRow)
             .on('end', queryEnd);
     }
@@ -322,22 +369,18 @@ var buildCache = function (cnt) {
     }
 };
 
-
-//rollback function
-var rollback = function (client, done) {
-    'use strict';
-    client.query('ROLLBACK', clientError);
-    client.end();
-};
-
 client = new pg.Client(dataBaseConnectionObject);
 client.on('drain', clientDrain);
 client.connect(clientError);
 
 //build process
 if (program.buildcache) {
+
+    //should be only one sql statement here so assume [0]
     queryConfig = buildcacheCntObj[0];
-    console.log(queryConfig);
+    /**
+      start the cache building process
+    **/
     query = client.query(queryConfig, clientError)
         .on('row', queryBuildRow)
         .on('end', queryEnd);
