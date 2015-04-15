@@ -77,6 +77,18 @@ sql:
   values:
 ```
 
+####running:
+
+```sh
+$ node simplicity-backend.js -d config/db.yml -m config/maintenance.yml
+```
+
+####returns:
+
+```
+
+```
+
 ####Data Tests Configuration
 ```sh
 $ cp datatests-sample.yml config/datatests.yml
@@ -106,7 +118,6 @@ tests:
   text: SELECT DISTINCT COUNT(type) OVER() > $1 as check FROM table1 GROUP BY type HAVING COUNT(type) > 0 ;
   values: [5]
 ```
-
 
 ####running:
 
