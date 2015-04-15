@@ -41,13 +41,106 @@ if (program.datatest) {
 }
 
 //maintenance passed as argument?
+/*
+__  __       _       _
+|  \/  |     (_)     | |
+| \  / | __ _ _ _ __ | |_ ___ _ __   __ _ _ __   ___ ___
+| |\/| |/ _` | | '_ \| __/ _ \ '_ \ / _` | '_ \ / __/ _ \
+| |  | | (_| | | | | | ||  __/ | | | (_| | | | | (_|  __/
+|_|  |_|\__,_|_|_| |_|\__\___|_| |_|\__,_|_| |_|\___\___|
+
+*/
 if (program.maintenance) {
+
+    //load maintenance yaml
     var maintenance = yaml.load(program.maintenance);
+
+    //clients for data maintenace
+    var maintenance_client;
+
+    //objects
     var maintenanceObj = maintenance.sql;
+    var maintenance_queryConfig;
+
+    //maintence drain callback when all maintenace queries finish
+    var maintenance_drain = function () {
+        'use strict';
+        maintenance_client.end();
+    };
+
+    //maintence error callback
+    var maintenance_clientError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Error: %s", err);
+        }
+        return err;
+    };
+
+    //maintenance query row callback
+    var maintenance_queryRow = function (row, result) {
+        'use strict';
+        return row;
+    };
+
+    //varrables for maintenance_queryEnd
+    var rowcount = 0;
+    var startname = '';
+    var complete = '';
+
+    /**
+      query end callbacl for maintenance
+      provides feedback about progress and status of build
+    **/
+    var maintenance_queryEnd = function (result) {
+        'use strict';
+
+        //calculate the percent complete
+        startname = this.name;
+        complete = ((rowcount / maintenanceObj.length) * 100).toFixed(2);
+
+        //messages for showing progress
+        console.log('Running ' + this.name + ' ' + complete + '% completed');
+        rowcount = rowcount + 1;
+
+    };
+
+    var maintenance = function () {
+        'use strict';
+
+        //open client and connection for maintenance
+        maintenance_client = new pg.Client(dataBaseConnectionObject);
+        maintenance_client.on('drain', maintenance_drain);
+        maintenance_client.connect(maintenance_clientError);
+
+        var id;
+
+        for (id in maintenanceObj) {
+            if (maintenanceObj.hasOwnProperty(id)) {
+                maintenance_queryConfig = maintenanceObj[id];
+                maintenance_client.query(maintenance_queryConfig, maintenance_clientError)
+                    .on('row', maintenance_queryRow)
+                    .on('end', maintenance_queryEnd);
+            }
+        }
+    };
+
+    //run  maintenance();
+    maintenance();
+
 }
 
 //buildcache data passed as argument?
+/*
+____        _ _     _    _____           _
+|  _ \      (_) |   | |  / ____|         | |
+| |_) |_   _ _| | __| | | |     __ _  ___| |__   ___
+|  _ <| | | | | |/ _` | | |    / _` |/ __| '_ \ / _ \
+| |_) | |_| | | | (_| | | |___| (_| | (__| | | |  __/
+|____/ \__,_|_|_|\__,_|  \_____\__,_|\___|_| |_|\___|
+*/
 if (program.buildcache) {
+    //Load build cache yaml
     var buildcacheYAML = yaml.load(program.buildcache);
 
     //objects
@@ -66,282 +159,290 @@ if (program.buildcache) {
     var buildcacheSleep = buildcacheYAML.sleep;
     var buildcacheDistances;
     var buildcacheCheckPass = true;
-}
 
-//Buffer check error callback
-var bufferCheck_clientError = function (err) {
-    'use strict';
-    if (err) {
-        console.error("Error: %s", err);
-    }
-    return err;
-};
+    //Buffer check error callback
+    var bufferCheck_clientError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Error: %s", err);
+        }
+        return err;
+    };
 
-//buffer checks when all queries finish
-var bufferCheck_drain = function () {
-    'use strict';
-    bufferCheck_client.end();
+    //buffer checks when all queries finish
+    var bufferCheck_drain = function () {
+        'use strict';
+        bufferCheck_client.end();
 
-    /**
-      veify checks completed successfully and if so
-      build the cache.
-    **/
-    if (buildcacheCheckPass) {
-        console.log('PASSED All Tests, building Cache!');
-        buildCache(cnt);
-    } else {
-        console.log('Failed a test!  Cache will not be built! Please see the log for details.');
-    }
-};
-
-/**
-  query on row method.
-  for building Cache when a row exists named check
-  we use that to determine a pass or fail.
-  when we encounter any fail we change the Tests state to fail with
-  datatestcheck.
-**/
-var bufferCheck_queryRow = function (row, result) {
-    'use strict';
-    if (row.hasOwnProperty('check')) {
-        if (row.check) {
-            console.log(this.name + ' PASSED.');
+        /**
+          veify checks completed successfully and if so
+          build the cache.
+        **/
+        if (buildcacheCheckPass) {
+            console.log('PASSED All Tests, building Cache!');
+            buildCache(cnt);
         } else {
-            console.log(this.name + ' FAILED.');
-            buildcacheCheckPass = false;
+            console.log('Failed a test!  Cache will not be built! Please see the log for details.');
         }
-    } else {
-        return false;
-    }
-};
+    };
 
-//when a buffer check query ends
-var bufferCheck_queryEnd = function (result) {
-    'use strict';
-    return result;
-};
-
-/*
-``check the buffers
-  runs data tests on buffer layers
-  ensures data is okay for buffering and will give good results
-  to simplicity
-*/
-var bufferCheck = function () {
-    'use strict';
-    var id;
-
-    //open client and connection for Checking buffers
-    bufferCheck_client = new pg.Client(dataBaseConnectionObject);
-    bufferCheck_client.on('drain', bufferCheck_drain);
-    bufferCheck_client.connect(bufferCheck_clientError);
-
-    //check the buffers
-    for (id in buildcacheChecksObj) {
-        if (buildcacheChecksObj.hasOwnProperty(id)) {
-
-            //send the sql statements to check the buffers
-            bufferCheck_client.query(buildcacheChecksObj[id], bufferCheck_clientError)
-                .on('row', bufferCheck_queryRow)
-                .on('end', bufferCheck_queryEnd);
-        }
-    }
-};
-
-//Build Buffer error callback
-var buildBuffer_clientError = function (err) {
-    'use strict';
-    if (err) {
-        console.error("Error: %s", err);
-    }
-    return err;
-};
-
-/**
-  Build Buffer query on row method.
-**/
-var buildBuffer_queryRow = function (row, result) {
-    'use strict';
-    if (row.hasOwnProperty('check')) {
-        if (row.check) {
-            console.log(this.name + ' PASSED.');
+    /**
+      query on row method.
+      for building Cache when a row exists named check
+      we use that to determine a pass or fail.
+      when we encounter any fail we change the Tests state to fail with
+      datatestcheck.
+    **/
+    var bufferCheck_queryRow = function (row, result) {
+        'use strict';
+        if (row.hasOwnProperty('check')) {
+            if (row.check) {
+                console.log(this.name + ' PASSED.');
+            } else {
+                console.log(this.name + ' FAILED.');
+                buildcacheCheckPass = false;
+            }
         } else {
-            console.log(this.name + ' FAILED.');
-            datatestcheck = false;
+            return false;
         }
-    } else {
-        return;
-    }
-};
+    };
 
-//when Buffer query ends
-var buildBuffer_queryEnd = function (result) {
-    'use strict';
-    return result;
-};
-
-//generic error callback for client,queries
-var buildBuffer_clientError = function (err) {
-    'use strict';
-    if (err) {
-        console.error("Error: %s", err);
-    }
-    return err;
-};
-
-/*
-  build the buffer layer
-  the buffer layer is used to find all the topics near a location or
-  address.
-*/
-var buildBuffer = function () {
-    'use strict';
-    var id;
-
-    //open client and connection for Buidling Buffers
-    buildBuffer_client = new pg.Client(dataBaseConnectionObject);
-    buildBuffer_client.on('drain', buildBuffer_Drain);
-    buildBuffer_client.connect(buildBuffer_clientError);
-
-    console.log('Building Buffers...');
-
-    //build controls - buffers
-    for (id in buildcacheCntrlObj) {
-        if (buildcacheCntrlObj.hasOwnProperty(id)) {
-            buildBuffer_client.query(buildcacheCntrlObj[id], buildBuffer_clientError)
-                .on('row', buildBuffer_queryRow)
-                .on('end', buildBuffer_queryEnd);
-        }
-    }
-};
-
-
-//generic error callback for client,queries
-var buildCache_clientError = function (err) {
-    'use strict';
-    if (err) {
-        console.error("Error: %s", err);
-    }
-    return err;
-};
-
-//when all cache buidling queroes end kill the client connection
-var buildCache_Drain = function () {
-    'use strict';
-    buildCache_client.end();
-    return;
-};
-
-//build cache query row callback
-var buildCache_queryRow = function (row, result) {
-    'use strict';
-    return row;
-};
-
-//varrables for buildCache_queryEnd
-var rowcount = 0;
-var startname = '';
-var dot = '';
-var complete = '';
-
-/**
-  query end callvacl for buidling the data cache
-  provides feedback about progress and status of build
-**/
-var buildCache_queryEnd = function (result) {
-    'use strict';
-
-    //small stall to increase performance on inserts.
-    sleep(buildcacheSleep);
-
-    /**
-      Capture the first named query for iterating the inserted count
-      we will derice the percent complete from this.
-    **/
-    if (rowcount === 0) {
-        startname = this.name;
-        rowcount = 1;
-    }
-
-    /**
-      iterate the count when we return the first named query
-      this insures that the percent complete is progresses for each
-      N inserts into the cache.
-    **/
-    if (startname === this.name) {
-
-        rowcount += buildcacheIncrement;
-
-        //calculate the percent complete
-        complete = ((rowcount / cnt) * 100).toFixed(2);
-        dot = '';
-        console.log('Processing next ' + buildcacheIncrement + ' locations, ' + complete + '% completed' + dot);
-    } else {
-        dot = dot + '.';
-    }
-
-    //messages for showing progress
-    console.log('  ' + this.name + '...' + result.rowCount + ' row(s) returned.  ');
-};
-
-//build the data cache
-var buildCache = function (cnt) {
-    'use strict';
-    var i = 0,
-        id,
-        theDistance,
-        theName,
-        buildCacheConfig;
-
-    //openclient and connection for buidling cache
-    buildCache_client = new pg.Client(dataBaseConnectionObject);
-    buildCache_client.on('drain', buildCache_Drain);
-    buildCache_client.connect(buildCache_clientError);
+    //when a buffer check query ends
+    var bufferCheck_queryEnd = function (result) {
+        'use strict';
+        return result;
+    };
 
     /*
-      loop count of all locations or addresses
-      in groups of N.  N Determined by buildcacheIncrement
+    ``check the buffers
+      runs data tests on buffer layers
+      ensures data is okay for buffering and will give good results
+      to simplicity
     */
-    for (i = 0; i < cnt; i += buildcacheIncrement) {
-        for (id in buildcacheObj) {
-            if (buildcacheObj.hasOwnProperty(id)) {
+    var bufferCheck = function () {
+        'use strict';
+        var id;
 
-                buildcacheDistances =  buildcacheObj[id].values.join();
+        //open client and connection for Checking buffers
+        bufferCheck_client = new pg.Client(dataBaseConnectionObject);
+        bufferCheck_client.on('drain', bufferCheck_drain);
+        bufferCheck_client.connect(bufferCheck_clientError);
 
-                /*
-                  check if distance is [0], this indicates
-                  that now distances are used.  So we need to handle
-                  the passing of parameters a little different
-                */
-                if (parseInt(buildcacheDistances) === 0) {
-                    //passes int of 0
-                    buildcacheDistances = 0;
-                } else {
-                    //passes an array of numerics values
-                    buildcacheDistances =  buildcacheObj[id].values;
-                }
+        //check the buffers
+        for (id in buildcacheChecksObj) {
+            if (buildcacheChecksObj.hasOwnProperty(id)) {
 
-                theDistance = buildcacheDistances;
-                theName = buildcacheObj[id].name;
-
-                //build config for query
-                buildCacheConfig = {
-                    name: theName,
-                    text: buildcacheObj[id].text,
-                    values: [buildcacheIncrement, i, theDistance]
-                };
-
-                /*
-                  send query for building cache in groups of N
-                  N is determeined by buildcacheIncrement
-                */
-                buildCache_client.query(buildCacheConfig, buildCache_clientError)
-                    .on('row', buildCache_queryRow)
-                    .on('end', buildCache_queryEnd);
+                //send the sql statements to check the buffers
+                bufferCheck_client.query(buildcacheChecksObj[id], bufferCheck_clientError)
+                    .on('row', bufferCheck_queryRow)
+                    .on('end', bufferCheck_queryEnd);
             }
         }
-    }
-};
+    };
+
+    //Build Buffer error callback
+    var buildBuffer_clientError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Error: %s", err);
+        }
+        return err;
+    };
+
+    var buildBuffer_drain = function () {
+        'use strict';
+        buildBuffer_client.end();
+        bufferCheck();
+    };
+
+    /**
+      Build Buffer query on row method.
+    **/
+    var buildBuffer_queryRow = function (row, result) {
+        'use strict';
+        if (row.hasOwnProperty('check')) {
+            if (row.check) {
+                console.log(this.name + ' PASSED.');
+            } else {
+                console.log(this.name + ' FAILED.');
+                datatestcheck = false;
+            }
+        } else {
+            return;
+        }
+    };
+
+    //when Buffer query ends
+    var buildBuffer_queryEnd = function (result) {
+        'use strict';
+        return result;
+    };
+
+    //generic error callback for client,queries
+    var buildBuffer_clientError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Error: %s", err);
+        }
+        return err;
+    };
+
+    /*
+      build the buffer layer
+      the buffer layer is used to find all the topics near a location or
+      address.
+    */
+    var buildBuffer = function () {
+        'use strict';
+        var id;
+
+        //open client and connection for Buidling Buffers
+        buildBuffer_client = new pg.Client(dataBaseConnectionObject);
+        buildBuffer_client.on('drain', buildBuffer_drain);
+        buildBuffer_client.connect(buildBuffer_clientError);
+
+        console.log('Building Buffers...');
+
+        //build controls - buffers
+        for (id in buildcacheCntrlObj) {
+            if (buildcacheCntrlObj.hasOwnProperty(id)) {
+                buildBuffer_client.query(buildcacheCntrlObj[id], buildBuffer_clientError)
+                    .on('row', buildBuffer_queryRow)
+                    .on('end', buildBuffer_queryEnd);
+            }
+        }
+    };
+
+
+    //generic error callback for client,queries
+    var buildCache_clientError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Error: %s", err);
+        }
+        return err;
+    };
+
+    //when all cache buidling queroes end kill the client connection
+    var buildCache_Drain = function () {
+        'use strict';
+        buildCache_client.end();
+        return;
+    };
+
+    //build cache query row callback
+    var buildCache_queryRow = function (row, result) {
+        'use strict';
+        return row;
+    };
+
+    //varrables for buildCache_queryEnd
+    var rowcount = 0;
+    var startname = '';
+    var dot = '';
+    var complete = '';
+
+    /**
+      query end callvacl for buidling the data cache
+      provides feedback about progress and status of build
+    **/
+    var buildCache_queryEnd = function (result) {
+        'use strict';
+
+        //small stall to increase performance on inserts.
+        sleep(buildcacheSleep);
+
+        /**
+          Capture the first named query for iterating the inserted count
+          we will derice the percent complete from this.
+        **/
+        if (rowcount === 0) {
+            startname = this.name;
+            rowcount = 1;
+        }
+
+        /**
+          iterate the count when we return the first query
+          this insures that the percent complete is progresses for each
+          N inserts into the cache.
+        **/
+        if (startname === this.name) {
+
+            rowcount += buildcacheIncrement;
+
+            //calculate the percent complete
+            complete = ((rowcount / cnt) * 100).toFixed(2);
+            dot = '';
+            console.log('Processing next ' + buildcacheIncrement + ' locations, ' + complete + '% completed' + dot);
+        } else {
+            dot = dot + '.';
+        }
+
+        //messages for showing progress
+        console.log('  ' + this.name + '...' + result.rowCount + ' row(s) returned.  ');
+    };
+
+    //build the data cache
+    var buildCache = function (cnt) {
+        'use strict';
+        var i = 0,
+            id,
+            theDistance,
+            theName,
+            buildCacheConfig;
+
+        //openclient and connection for buidling cache
+        buildCache_client = new pg.Client(dataBaseConnectionObject);
+        buildCache_client.on('drain', buildCache_Drain);
+        buildCache_client.connect(buildCache_clientError);
+
+        /*
+          loop count of all locations or addresses
+          in groups of N.  N Determined by buildcacheIncrement
+        */
+        for (i = 0; i < cnt; i += buildcacheIncrement) {
+            for (id in buildcacheObj) {
+                if (buildcacheObj.hasOwnProperty(id)) {
+
+                    buildcacheDistances =  buildcacheObj[id].values.join();
+
+                    /*
+                      check if distance is [0], this indicates
+                      that now distances are used.  So we need to handle
+                      the passing of parameters a little different
+                    */
+                    if (parseInt(buildcacheDistances) === 0) {
+                        //passes int of 0
+                        buildcacheDistances = 0;
+                    } else {
+                        //passes an array of numerics values
+                        buildcacheDistances =  buildcacheObj[id].values;
+                    }
+
+                    theDistance = buildcacheDistances;
+                    theName = buildcacheObj[id].name;
+
+                    //build config for query
+                    buildCacheConfig = {
+                        name: theName,
+                        text: buildcacheObj[id].text,
+                        values: [buildcacheIncrement, i, theDistance]
+                    };
+
+                    /*
+                      send query for building cache in groups of N
+                      N is determeined by buildcacheIncrement
+                    */
+                    buildCache_client.query(buildCacheConfig, buildCache_clientError)
+                        .on('row', buildCache_queryRow)
+                        .on('end', buildCache_queryEnd);
+                }
+            }
+        }
+    };
+
+
+}
 
 //sleep function
 //short rest to allow for sql insert to complete
@@ -375,12 +476,6 @@ var successDrain = function () {
     'use strict';
     successClient.end();
 };
-
-
-
-
-
-
 
 
 /**
@@ -432,11 +527,6 @@ var queryBuildRow = function (row, result) {
 
 
 
-var buildBuffer_Drain = function () {
-    'use strict';
-    buildBuffer_client.end();
-    bufferCheck();
-};
 
 /**
     drain for main client.
@@ -504,17 +594,6 @@ if (program.datatest) {
     }
 }
 
-//maintenance routines
-if (program.maintenance) {
-    for (sql in maintenanceObj) {
-        if (maintenanceObj.hasOwnProperty(sql)) {
-            queryConfig = maintenanceObj[sql];
-            query = client.query(queryConfig, clientError)
-                .on('row', queryRow)
-                .on('end', queryEnd);
-        }
-    }
-}
 
 //time query to ensure end client ends
 query = client.query('SELECT NOW()', clientError);
