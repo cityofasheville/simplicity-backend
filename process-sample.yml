@@ -1,10 +1,9 @@
+increment: 100
+sleep: 0
 count:
 - name: count
   text: SELECT count(*) as count FROM postgres.locations_table1_hold;
   values:
-increment: 100
-sleep: 0
-distances: [10]
 control:
 - name: truncate buffers
   text: TRUNCATE table postgres.locations_buffers_cache_hold;
@@ -57,23 +56,20 @@ control:
 - name: vaucum cache
   text: VACUUM ANALYZE postgres.data_cache_hold;
   values:
-controlcheck:
+buffercheck:
 - name: check buffers
   text: select now();
   values:
 - name:  count distances
   text: select now():
   values:
-sql:
+buildcache:
 - name: Crime
   text: INSERT INTO gisowner.coa_overlay_data_cache_hold (SELECT DISTINCT avw.civicaddress_id, 'CRIME'::varchar(150) as type, avw.distance as distance, (SELECT string_agg(tp,',')::text FROM (SELECT b.pid::text as tp FROM gisowner.coa_opendata_crime_hold b WHERE st_contains(avw.shape,b.shape )) as hold)::text as data,''::text datajson FROM gisowner.coa_address_buffers_cache_hold AS avw LEFT JOIN gisowner.coa_address_buffers_cache_hold buf ON buf.civicaddress_id = avw.civicaddress_id LEFT JOIN gisowner.coa_opendata_address_hold addr ON addr.civicaddress_id = buf.civicaddress_id WHERE avw.distance = ANY($3::numeric[]) and avw.civicaddress_id in (select civicaddress_id from gisowner.coa_opendata_address_hold order by civicaddress_id limit $1 offset $2))
-  values:
-  distances: [82.5000,660.0000,1320.0000,330.0000,65.0000]
+  values: [82.5000,660.0000,1320.0000,330.0000,65.0000]
 - name: Permits
   text: INSERT INTO gisowner.coa_overlay_data_cache_hold (SELECT DISTINCT avw.civicaddress_id,'PERMITS'::varchar(150) as type, avw.distance as distance, (SELECT string_agg(tp,',')::text FROM (SELECT DISTINCT b.apn::text as tp FROM gisowner.coa_opendata_permits_hold b WHERE st_contains(avw.shape,b.shape) ) as hold)::text as data, ''::text datajson FROM gisowner.coa_address_buffers_cache_hold AS avw LEFT JOIN gisowner.coa_address_buffers_cache_hold buf ON buf.civicaddress_id = avw.civicaddress_id LEFT JOIN gisowner.coa_opendata_address_hold addr ON addr.civicaddress_id = buf.civicaddress_id WHERE avw.distance = ANY($3::numeric[]) and avw.civicaddress_id in (select civicaddress_id from gisowner.coa_opendata_address_hold order by civicaddress_id limit $1 offset $2))
-  values:
-  distances: [82.5000,660.0000,1320.0000,330.0000,65.0000]
+  values: [82.5000,660.0000,1320.0000,330.0000,65.0000]
 - name: Address In City
   text: INSERT INTO gisowner.coa_overlay_data_cache_hold (SELECT DISTINCT civx.civicaddress_id, 'ADDRESS IN CITY'::varchar(150) as type,$3::numeric(38,8) as distance,CASE WHEN (SELECT string_agg(tp,',')::text FROM (SELECT b.jurisdiction_type::text as tp FROM gisowner.coa_opendata_city_limits_hold b WHERE st_intersects(addr.shape,b.shape))  as hold)::varchar(255) like '%Asheville Corporate Limits%' THEN 'YES' ELSE 'NO' END as data FROM gisowner.coa_opendata_property_hold as a LEFT JOIN gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold civx ON civx.pinnum = a.pinnum LEFT JOIN gisowner.coa_opendata_address_hold addr ON addr.civicaddress_id = civx.civicaddress_id WHERE addr.civicaddress_id in (select distinct civicaddress_id from gisowner.coa_opendata_address_hold order by civicaddress_id limit $1 offset $2));
-  values:
-  distances: [0]
+  values: [0]

@@ -181,26 +181,26 @@ increment - number of locationids to process at a time.  With limited testing I 
 
 sleep - in some cases depending on server resources I have seen the process time actually improve by increaseing this. around 1 - 3 seconds seems to work best.  the number is milliseconds. So 1 second is 1000.
 
-Control - this is used to create the buffer layer.  Data will process once this section is complete
+buffer - this is used to create the buffer layer.  Data will process once this section is complete
 
-Controlcheck - quick check to make sure buffer data is valid and was created succesfully. Data will not pricess untill checks are passed.
+buffercheck - quick check to make sure buffer data is valid and was created successfully. Data will not process until checks are passed.
 
 ###*Rule:*  
 * The SQL statement must have one field that returns a boolean named exactly "check".
 * The SQL statement must return one row
 
-SQL - SQL statments to collect data for each buffer.
-needs distances to create entries for each distance.  a distance of [0] indicates no buffers used.
+buildcache - SQL statments to collect data for each buffer.  Needs distances in the values to create entries for each distance.  The distances must exist in the buffer layer.
+
+in the section buildcache a [0] in the values for the indicates no buffers used.
 
 ```yaml
+increment: 100
+sleep: 0
+control:
 count:
 - name: count
   text: SELECT count(*) as count FROM postgres.locations_table1_hold;
   values:
-increment: 100
-sleep: 0
-distances: [10]
-control:
 - name: truncate buffers
   text: TRUNCATE table postgres.locations_buffers_cache_hold;
   values:
@@ -252,26 +252,23 @@ control:
 - name: vaucum cache
   text: VACUUM ANALYZE postgres.data_cache_hold;
   values:
-controlcheck:
+buffercheck:
 - name: check buffers
   text: select now();
   values:
 - name:  count distances
   text: select now():
   values:
-sql:
+buildcache:
 - name: Crime
   text: INSERT INTO postgres.data_cache_hold (SELECT DISTINCT avw.locationid, 'CRIME'::varchar(150) as type, avw.distance as distance, (SELECT string_agg(tp,',')::text FROM (SELECT b.pid::text as tp FROM postgres.crime_hol b WHERE st_contains(avw.shape,b.shape )) as hold)::text as data,''::text datajson FROM gisowner.coa_address_buffers_cache_hold AS avw LEFT JOIN gisowner.coa_address_buffers_cache_hold buf ON buf.locationid = avw.locationid LEFT JOIN gisowner.coa_opendata_address_hold addr ON addr.locationid = buf.locationid WHERE avw.distance = ANY($3::numeric[]) and avw.locationid in (select locationid from gisowner.coa_opendata_address_hold order by locationid limit $1 offset $2))
-  values:
-  distances: [82.5000,660.0000,1320.0000,330.0000,65.0000]
+  values: [82.5000,660.0000,1320.0000,330.0000,65.0000]
 - name: Permits
   text: INSERT INTO postgres.data_cache_hold (SELECT DISTINCT avw.locationid,'PERMITS'::varchar(150) as type, avw.distance as distance, (SELECT string_agg(tp,',')::text FROM (SELECT DISTINCT b.apn::text as tp FROM gisowner.coa_opendata_permits_hold b WHERE st_contains(avw.shape,b.shape) ) as hold)::text as data, ''::text datajson FROM gisowner.coa_address_buffers_cache_hold AS avw LEFT JOIN gisowner.coa_address_buffers_cache_hold buf ON buf.locationid = avw.locationid LEFT JOIN gisowner.coa_opendata_address_hold addr ON addr.locationid = buf.locationid WHERE avw.distance = ANY($3::numeric[]) and avw.locationid in (select locationid from gisowner.coa_opendata_address_hold order by locationid limit $1 offset $2))
-  values:
-  distances: [82.5000,660.0000,1320.0000,330.0000,65.0000]
+  values: [82.5000,660.0000,1320.0000,330.0000,65.0000]
 - name: Address In City
   text: INSERT INTO postgres.data_cache_hold (SELECT DISTINCT civx.locationid, 'ADDRESS IN CITY'::varchar(150) as type,$3::numeric(38,8) as distance,CASE WHEN (SELECT string_agg(tp,',')::text FROM (SELECT b.jurisdiction_type::text as tp FROM gisowner.coa_opendata_city_limits_hold b WHERE st_intersects(addr.shape,b.shape))  as hold)::varchar(255) like '%Asheville Corporate Limits%' THEN 'YES' ELSE 'NO' END as data FROM gisowner.coa_opendata_property_hold as a LEFT JOIN gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold civx ON civx.pinnum = a.pinnum LEFT JOIN gisowner.coa_opendata_address_hold addr ON addr.locationid = civx.locationid WHERE addr.locationid in (select distinct locationid from gisowner.coa_opendata_address_hold order by locationid limit $1 offset $2));
-  values:
-  distances: [0]
+  values: [0]
 ```
 
 ##Running
