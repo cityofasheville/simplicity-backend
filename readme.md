@@ -135,7 +135,7 @@ edit `config/process.yml` and update with your settings.
 
 In this sample 2264 is the projection of NC State Plane.  Adjust the the Projection code to match your projections code.
 
-#####Sampel view DDL
+#####Sample view DDL
 ```sql
 CREATE OR REPLACE VIEW postgres.locations_view_hold  AS
  	SELECT
