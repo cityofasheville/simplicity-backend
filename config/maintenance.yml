@@ -2,12 +2,45 @@ sql:
 - name: reindex gisowner.coa_opendata_address
   text: REINDEX TABLE gisowner.coa_opendata_address;
   values:
-- name: VACUUM gisowner.coa_opendata_address
-  text: VACUUM ANALYZE gisowner.coa_opendata_address;
-  values:
 - name: reindex gisowner.coa_opendata_address_hold
   text: REINDEX TABLE gisowner.coa_opendata_address;
   values:
+- name: Update Neighborhoods in crime table
+  text: UPDATE gisowner.coa_opendata_crime_hold as a SET neighborhood = (SELECT string_agg(tp,',')::text FROM (SELECT b.name::text as tp FROM gisowner.coa_opendata_asheville_neighborhoods_hold b WHERE st_intersects(b.shape,a.shape) ) as hold)::text;
+  values:
+- name: Update Neighborhoods in permits table
+  text: UPDATE gisowner.coa_opendata_permits_hold as a SET neighborhood = (SELECT string_agg(tp,',')::text FROM (SELECT b.name::text as tp FROM gisowner.coa_opendata_asheville_neighborhoods_hold b WHERE st_intersects(b.shape,a.shape) ) as hold)::text;
+  values:
+- name: Update Neighborhoods in Property table
+  text: update gisowner.coa_opendata_property_hold as a SET neighborhood = (SELECT string_agg(tp,',')::text FROM (SELECT b.name::text as tp FROM gisowner.coa_opendata_asheville_neighborhoods_hold b WHERE st_intersects(b.shape,a.shape) ) as hold)::text;
+  values:
+- name: Update Neighborhoods in Address table
+  text: update gisowner.coa_opendata_address_hold as a SET neighborhood = (SELECT string_agg(tp,',')::text FROM (SELECT b.name::text as tp FROM gisowner.coa_opendata_asheville_neighborhoods_hold b WHERE st_intersects(b.shape,a.shape) ) as hold)::text;
+  values:
+- name: Update street_responsibility in streets table
+  text: update gisowner.coa_opendata_streets_hold set street_responsibility = 'UNKNOWN' where street_responsibility = 'UNKOWN';
+  values:
+- name: Update snow removal in streets table
+  text: update gisowner.coa_opendata_streets_hold set street_snowremoval = 'UNKNOWN' where street_snowremoval = 'UNKOWN';
+  values:
+- name: Update addressid in address table
+  text: UPDATE gisowner.coa_opendata_address_hold set addressid = civicaddress_id::varchar(25);
+  values:
+- name: Update pid in crime table
+  text: UPDATE gisowner.coa_opendata_crime_hold SET pid = subquery.pid  FROM (SELECT objectid, row_number() OVER (ORDER BY (objectid))::integer as pid FROM gisowner.coa_opendata_crime_hold)  subquery WHERE subquery.objectid = coa_opendata_crime_hold.objectid
+  values:
 - name: VACUUM gisowner.coa_opendata_address_hold
   text: VACUUM ANALYZE gisowner.coa_opendata_address_hold;
+  values:
+- name: VACUUM gisowner.coa_opendata_address
+  text: VACUUM ANALYZE gisowner.coa_opendata_address;
+  values:
+- name: VACUUM gisowner.coa_opendata_permits_hold
+  text: VACUUM ANALYZE gisowner.coa_opendata_permits_hold;
+  values:
+- name: VACUUM gisowner.coa_opendata_crime_hold
+  text: VACUUM ANALYZE gisowner.coa_opendata_crime_hold;
+  values:
+- name: VACUUM gisowner.coa_opendata_streets_hold
+  text: VACUUM ANALYZE gisowner.coa_opendata_streets_hold;
   values:

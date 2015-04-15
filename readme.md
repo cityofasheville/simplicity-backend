@@ -3,14 +3,12 @@
 The simplicity backend powers the [simplicity ui](https://github.com/cityofasheville/simplicity-ui) and [simplicity app](http://cityofasheville.github.io/simplicity-ui)
 
 ##What the backend accomplishes.
-* Processes data into the format the simplicity ui expects **TODO**.
-  * still using old method via create-overlays.sh  and sql files in sql/ directory.
-  * Try use pg-cursor. and 1000 at a time
+* Processes data into the format the simplicity ui expects..
 * Verifies correct schema for data **TODO**.
 * Compiles spatial queries in advance **TODO**.
 * Checks data consistency to ensure simplicity app will work properly.
   * Framework in place.
-  * Will not push data from hold tables to production tables until data checks PASS **TODO**.
+  * Will not push data from hold tables to production tables until data checks PASS
 * Runs database maintenance routines i.e. reindex, vacuum, etc .
   * Framework in place
 
@@ -40,14 +38,14 @@ Usage: simplicity-backend [options]
 
 ###database connection
 ```sh
-$ cp db-sample.yml config/db.yml
+$ cp db_sample.yml config/db.yml
 ```
 **Warning:** naming this file anything but db.yml will push the database configuration including the password to github on a git push.
 
 edit `config/db.yml` and update with your settings.
 
 ```sh
-$ cp datatests-sample.yml config/db.yml
+$ cp datatests_sample.yml config/db.yml
 ```
 
 #####example database configuration
@@ -138,7 +136,7 @@ table1 tests Test Result: false
 
 ####Build Cache Configuration
 ```sh
-$ cp buildcache-sample.yml config/buildcache.yml
+$ cp buildcache_sample.yml config/buildcache.yml
 ```
 
 edit `config/buildcache.yml` and update with your settings.

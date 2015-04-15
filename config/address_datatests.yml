@@ -1,0 +1,18 @@
+testname: address
+onsuccess:
+- name: truncate address
+  text: TRUNCATE TABLE gisowner.coa_opendata_address;
+  values:
+- name: insert addres
+  text: INSERT INTO gisowner.coa_opendata_address (SELECT * FROM gisowner.coa_opendata_address_hold);
+  values:
+tests:
+- name: count address
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_address_hold;
+  values: [10000]
+- name: count neighborhood in address
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_address_hold WHERE neighborhood is not null;
+  values: [100]
+- name: location type
+  text: SELECT DISTINCT COUNT(location_type) OVER() > $1 as check FROM gisowner.coa_opendata_address_hold GROUP BY location_type HAVING COUNT(location_type) > 0 ;
+  values: [3]
