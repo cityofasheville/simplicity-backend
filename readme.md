@@ -21,6 +21,21 @@ $ cd simplicity-backend
 $ npm install
 ```
 
+##Running
+```
+
+Usage: simplicity-backend [options]
+
+ Options:
+
+   -h, --help                 output usage information
+   -V, --version              output the version number
+   -d, --databaseconn <file>  PostGres database connection file <file> default is config/db.yml
+   -m, --maintenance <file>   maintenance configuration file <file>
+   -t, --datatest <file>      data test configuration file <file>
+   -c, --buildcache <file>    data test configuration file <file>
+```
+
 ##Setup
 
 ###database connection
@@ -92,27 +107,14 @@ tests:
   values: [5]
 ```
 
-##Running
-```
 
-Usage: simplicity-backend [options]
-
- Options:
-
-   -h, --help                 output usage information
-   -V, --version              output the version number
-   -d, --databaseconn <file>  PostGres database connection file <file> default is config/db.yml
-   -m, --maintenance <file>   maintenance configuration file <file>
-   -t, --datatest <file>      data test configuration file <file>
-   -c, --buildcache <file>    data test configuration file <file>
-```
-running:
+####running:
 
 ```sh
 $ node simplicity-backend.js -d config/db.yml -t config/datatests.yml
 ```
 
-returns:
+####returns:
 
 ```
 count table1 FAILED.
@@ -271,32 +273,38 @@ buildcache:
   values: [0]
 ```
 
-##Running
-```
-
-Usage: simplicity-backend [options]
-
- Options:
-
-   -h, --help                 output usage information
-   -V, --version              output the version number
-   -d, --databaseconn <file>  PostGres database connection file <file> default is config/db.yml
-   -m, --maintenance <file>   maintenance configuration file <file>
-   -t, --datatest <file>      data test configuration file <file>
-   -c, --buildcache <file>    data test configuration file <file>
-```
-running:
+####running:
 
 ```sh
 $ node simplicity-backend.js -d config/db.yml -c config/processyml
 ```
 
-returns:
+####returns:
 
 ```
-count table1 FAILED.
-type table1 PASSED.
-table1 tests Test Result: false
+total address count: 148412
+Building Buffers...
+check buffers PASSED.
+count distances PASSED.
+PASSED All Tests, building Cache!
+Processing next 100 locations, 0.07% completed
+  Crime...400 row(s) returned.  
+  Permits...400 row(s) returned.  
+  Address In City...93 row(s) returned.  
+  Zoning...93 row(s) returned.  
+  Zoning Overlays...93 row(s) returned.  
+  Trash Day...93 row(s) returned.  
+  Recycle Day...93 row(s) returned.  
+  Remove Blanks...1163 row(s) returned.  
+Processing next 100 locations, 0.14% completed
+  Crime...400 row(s) returned.  
+  Permits...400 row(s) returned.  
+  Address In City...98 row(s) returned.  
+  Zoning...98 row(s) returned.  
+  Zoning Overlays...98 row(s) returned.  
+  Trash Day...98 row(s) returned.  
+  Recycle Day...98 row(s) returned.  
+  Remove Blanks...1192 row(s) returned.
 ```
 
 ##Software
