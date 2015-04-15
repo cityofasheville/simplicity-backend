@@ -125,10 +125,10 @@ table1 tests Test Result: false
 
 ####Build Cache Configuration
 ```sh
-$ cp process-sample.yml config/process.yml
+$ cp buildcache-sample.yml config/buildcache.yml
 ```
 
-edit `config/process.yml` and update with your settings.
+edit `config/buildcache.yml` and update with your settings.
 
 ###*Rule:*  
 * The Count SQL statement must have one field that returns a integer named exactly "count".
@@ -276,7 +276,7 @@ buildcache:
 ####running:
 
 ```sh
-$ node simplicity-backend.js -d config/db.yml -c config/process.yml
+$ node simplicity-backend.js -d config/db.yml -c config/buildcache.yml
 ```
 
 ####returns:
