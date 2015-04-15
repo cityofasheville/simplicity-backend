@@ -85,9 +85,9 @@ if (program.datatest) {
         'use strict';
         if (row.hasOwnProperty('check')) {
             if (row.check) {
-                console.log(this.name + ' PASSED.');
+                console.log('  ' + this.name + ' PASSED.');
             } else {
-                console.log(this.name + ' FAILED.');
+                console.log('  ' + this.name + ' FAILED.');
                 datatestcheck = false;
             }
         } else {
@@ -95,9 +95,26 @@ if (program.datatest) {
         }
     };
 
+    //varrables for dataTests_queryEnd
+    var dataTests_rowcount = 0;
+    var dataTests_complete = '';
+    var dataTests_first = true;
+
     //when query ends
     var dataTests_queryEnd = function (result) {
         'use strict';
+
+        //if (dataTests_first) {
+        //  dataTests_first = false;
+        //    console.log(dataTests_YAML.testname + ' Running Data check.');
+        //}
+        //calculate the percent complete
+        //dataTests_complete = ((dataTests_rowcount / dataTests_YAML.tests.length) * 100).toFixed(2);
+
+        //messages for showing progress
+        //console.log('  Running ' + this.name + ' ' + dataTests_complete + '% completed');
+        //dataTests_rowcount = dataTests_rowcount + 1;
+
         return result;
     };
 
@@ -112,7 +129,7 @@ if (program.datatest) {
 
         var id;
         var dataTests_queryConfig;
-
+        console.log('Running Test ' + dataTests_YAML.testname)
         for (id in dataTests_Obj) {
             if (dataTests_Obj.hasOwnProperty(id)) {
 
@@ -146,10 +163,26 @@ if (program.datatest) {
         return row;
     };
 
+    //varrables for dataTestsSuccess_queryEnd
+    var dataTestsSuccess_rowcount = 0;
+    var dataTestsSuccess_complete = '';
+    var dataTestsSuccess_first = true;
+
     //when query ends
     var dataTestsSuccess_queryEnd = function (result) {
         'use strict';
-        return result;
+
+        if (dataTestsSuccess_first) {
+            dataTestsSuccess_first = false;
+            console.log('');
+            console.log('Running Data Push for ' + dataTests_YAML.testname);
+        }
+        //calculate the percent complete
+        dataTestsSuccess_complete = ((dataTestsSuccess_rowcount / dataTests_YAML.onsuccess.length) * 100).toFixed(2);
+
+        //messages for showing progress
+        console.log('  Running ' + this.name + ' ' + dataTestsSuccess_complete + '% completed');
+        dataTestsSuccess_rowcount = dataTestsSuccess_rowcount + 1;
     };
 
     //data tests success full run these queries

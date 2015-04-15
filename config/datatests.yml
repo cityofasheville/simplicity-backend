@@ -1,10 +1,10 @@
 testname: address
 onsuccess:
 - name: truncate address
-  text: SELECT * FROM gisowner.coa_opendata_address_hold limit 1;
+  text: TRUNCATE TABLE gisowner.coa_opendata_address;
   values:
 - name: insert addres
-  text: SELECT * FROM gisowner.coa_opendata_address_hold limit 2;
+  text: INSERT INTO gisowner.coa_opendata_address (SELECT * FROM gisowner.coa_opendata_address_hold);
   values:
 tests:
 - name: count address
