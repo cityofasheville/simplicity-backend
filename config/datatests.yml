@@ -1,18 +1,15 @@
 testname: address
 onsuccess:
-- name: truncate
+- name: truncate address
   text: SELECT * FROM gisowner.coa_opendata_address_hold limit 1;
   values:
-- name: insert
+- name: insert addres
   text: SELECT * FROM gisowner.coa_opendata_address_hold limit 2;
   values:
 tests:
 - name: count address
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_address_hold;
-  values: [10000000]
+  values: [10000]
 - name: count neighborhood in address
-  text: SELECT count(*) =  > $1 as check FROM gisowner.coa_opendata_property_hold WHERE neighborhood is not null;
-  values: [10]
-- name: count buffers in address
-  text: SELECT count(*) =  > $1 as check FROM gisowner.coa_opendata_property_hold WHERE neighborhood is not null;
-  values: [100]
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_property_hold WHERE neighborhood is not null;
+  values: [-2]

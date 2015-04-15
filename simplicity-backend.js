@@ -21,23 +21,161 @@ program
 **/
 var dataBaseConnectionObject = yaml.load(program.databaseconn);
 
-var sql;
-var client;
-var successClient;
-var query;
-var checkQuery;
-var queryConfig = {};
-
 /**
+_____        _          _______        _
+|  __ \      | |        |__   __|      | |
+| |  | | __ _| |_ __ _     | | ___  ___| |_ ___
+| |  | |/ _` | __/ _` |    | |/ _ \/ __| __/ __|
+| |__| | (_| | || (_| |    | |  __/\__ \ |_\__ \
+|_____/ \__,_|\__\__,_|    |_|\___||___/\__|___/
+
+
   data tests passed as argument?
   if so run the data testests
   the argiument must be a yaml file
 **/
 if (program.datatest) {
-    var dataTests = yaml.load(program.datatest);
-    var dataTestsObj = dataTests.tests;
+
+    //objects
+    var dataTests_YAML = yaml.load(program.datatest);
+    var dataTests_Obj = dataTests_YAML.tests;
+
+    //clients for data data tests
+    var dataTests_client;
+    var dataTestsSuccess_client;
+
     var datatestcheck = true;
     var checkrun = false;
+
+    //data test drain callback when all maintenace queries finish
+    var dataTests_drain = function () {
+        'use strict';
+        dataTests_client.end();
+
+        //all tests completed and one of them failed
+        if (checkrun) {
+            console.log(dataTests_YAML.testname + ' Test Results: ' + datatestcheck);
+            console.log('Failed a test!  Cache will not be built! Please see the log for details');
+        }
+
+        //all tests completed and succesfull
+        if (datatestcheck && !checkrun) {
+            console.log(dataTests_YAML.testname + ' Test Results: ' + datatestcheck);
+            dataTestsSuccess();
+        }
+    };
+
+    //generic error callback for client,queries
+    var dataTests_clientError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Error: %s", err);
+        }
+        return err;
+    };
+
+    /**
+      query on row method.
+      for data tests when a row exists named check
+      we use that to determine a pass or fail.
+      when we encounter any fail we change the Tests state to fail with
+      datatestcheck.
+    **/
+    var dataTests_queryRow = function (row, result) {
+        'use strict';
+        if (row.hasOwnProperty('check')) {
+            if (row.check) {
+                console.log(this.name + ' PASSED.');
+            } else {
+                console.log(this.name + ' FAILED.');
+                datatestcheck = false;
+            }
+        } else {
+            return;
+        }
+    };
+
+    //when query ends
+    var dataTests_queryEnd = function (result) {
+        'use strict';
+        return result;
+    };
+
+    //data tests functionå
+    var dataTests = function () {
+        'use strict';
+
+        //open client and connection for Checking buffers
+        dataTests_client = new pg.Client(dataBaseConnectionObject);
+        dataTests_client.on('drain', dataTests_drain);
+        dataTests_client.connect(dataTests_clientError);
+
+        var id;
+        var dataTests_queryConfig;
+
+        for (id in dataTests_Obj) {
+            if (dataTests_Obj.hasOwnProperty(id)) {
+
+                dataTests_queryConfig = dataTests_Obj[id];
+
+                dataTests_client.query(dataTests_queryConfig, dataTests_clientError)
+                    .on('row', dataTests_queryRow)
+                    .on('end', dataTests_queryEnd);
+            }
+        }
+    };
+
+    //data test sucessfull drain callback when all maintenace queries finish
+    var dataTestsSuccess_drain = function () {
+        'use strict';
+        dataTestsSuccess_client.end();
+    };
+
+    //generic error callback for client,queries
+    var dataTestsSuccess_clientError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Error: %s", err);
+        }
+        return err;
+    };
+
+    //data tests successful query row callback
+    var dataTestsSuccess_queryRow = function (row, result) {
+        'use strict';
+        return row;
+    };
+
+    //when query ends
+    var dataTestsSuccess_queryEnd = function (result) {
+        'use strict';
+        return result;
+    };
+
+    //data tests success full run these queries
+    var dataTestsSuccess = function() {
+      'use strict';
+
+      //open client and connection for Checking buffers
+      dataTestsSuccess_client = new pg.Client(dataBaseConnectionObject);
+      dataTestsSuccess_client.on('drain', dataTestsSuccess_drain);
+      dataTestsSuccess_client.connect(dataTestsSuccess_clientError);
+
+      var sqlcommands = dataTests_YAML.onsuccess;
+      var id;
+
+      for (id in sqlcommands) {
+          if (sqlcommands.hasOwnProperty(id)) {
+              checkrun = true;
+              dataTestsSuccess_client.query(sqlcommands[id], dataTestsSuccess_clientError)
+                  .on('row', dataTestsSuccess_queryRow)
+                  .on('end', dataTestsSuccess_queryEnd);
+          }
+      }
+    };
+
+    //run data tests
+    dataTests();
 }
 
 //maintenance passed as argument?
@@ -53,13 +191,13 @@ __  __       _       _
 if (program.maintenance) {
 
     //load maintenance yaml
-    var maintenance = yaml.load(program.maintenance);
+    var maintenance_YAML = yaml.load(program.maintenance);
 
     //clients for data maintenace
     var maintenance_client;
 
     //objects
-    var maintenanceObj = maintenance.sql;
+    var maintenance_Obj = maintenance_YAML.sql;
     var maintenance_queryConfig;
 
     //maintence drain callback when all maintenace queries finish
@@ -97,7 +235,7 @@ if (program.maintenance) {
 
         //calculate the percent complete
         startname = this.name;
-        complete = ((rowcount / maintenanceObj.length) * 100).toFixed(2);
+        complete = ((rowcount / maintenance_Obj.length) * 100).toFixed(2);
 
         //messages for showing progress
         console.log('Running ' + this.name + ' ' + complete + '% completed');
@@ -106,7 +244,7 @@ if (program.maintenance) {
     };
 
     /*
-      main function for runnong sql based maintenace      
+      main function for runnong sql based maintenace
     */
     var maintenance = function () {
         'use strict';
@@ -118,9 +256,9 @@ if (program.maintenance) {
 
         var id;
 
-        for (id in maintenanceObj) {
-            if (maintenanceObj.hasOwnProperty(id)) {
-                maintenance_queryConfig = maintenanceObj[id];
+        for (id in maintenance_Obj) {
+            if (maintenance_Obj.hasOwnProperty(id)) {
+                maintenance_queryConfig = maintenance_Obj[id];
                 maintenance_client.query(maintenance_queryConfig, maintenance_clientError)
                     .on('row', maintenance_queryRow)
                     .on('end', maintenance_queryEnd);
@@ -133,6 +271,7 @@ if (program.maintenance) {
 
 }
 
+
 //buildcache data passed as argument?
 /*
 ____        _ _     _    _____           _
@@ -144,24 +283,92 @@ ____        _ _     _    _____           _
 */
 if (program.buildcache) {
     //Load build cache yaml
-    var buildcacheYAML = yaml.load(program.buildcache);
+    var buildcache_YAML = yaml.load(program.buildcache);
 
     //objects
-    var buildcacheObj = buildcacheYAML.buildcache;
-    var buildcacheCntObj = buildcacheYAML.count;
-    var buildcacheCntrlObj = buildcacheYAML.buffer;
-    var buildcacheChecksObj = buildcacheYAML.buffercheck;
+    var buildCache_Obj = buildcache_YAML.buildcache;
+    var buildCacheCount_Obj = buildcache_YAML.count;
+    var buildBuffer_Obj = buildcache_YAML.buffer;
+    var buildCheck_Obj = buildcache_YAML.buffercheck;
 
     //clients for each step of building the cache
+    var buildCacheCount_client;
     var bufferCheck_client;
     var buildBuffer_client;
     var buildCache_client;
 
     //controling variables
-    var buildcacheIncrement = buildcacheYAML.increment;
-    var buildcacheSleep = buildcacheYAML.sleep;
+    var buildcacheIncrement = buildcache_YAML.increment;
+    var buildcacheSleep = buildcache_YAML.sleep;
     var buildcacheDistances;
     var buildcacheCheckPass = true;
+    var buildcach = queryConfig;
+
+    //Cache Count error callback
+    var  buildCacheCount_clientError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Error: %s", err);
+        }
+        return err;
+    };
+
+
+    //when all cache buildCacheCount queries end kill the client connection
+    var buildCacheCount_Drain = function () {
+        'use strict';
+        buildCacheCount_client.end();
+        return;
+    };
+
+    /**
+      query row callback for buildCacheCount
+    **/
+    var buildCacheCount_queryRow = function (row, result) {
+        'use strict';
+
+        //check row count
+        if (row.count) {
+            cnt = row.count;
+
+            //must have more that one address to work
+            if (cnt <  1) {
+                console.error('Building a cache requires more than one record in the address table.');
+            } else {
+                console.log('total address count: ' + cnt);
+                //if more than 1 address build the buffer layer
+                buildBuffer();
+            }
+
+        } else {
+            //the query to check the number of addresses must have an integer field named count
+            console.error('Must have a column named count!');
+        }
+    };
+
+    //when query ends
+    var buildCacheCount_queryEnd = function (result) {
+        'use strict';
+        return result;
+    };
+
+    //should be only one sql statement here so assume [0]
+    var buildCacheCount = function () {
+        'use strict';
+
+        //open client and connection for Checking buffers
+        buildCacheCount_client = new pg.Client(dataBaseConnectionObject);
+        buildCacheCount_client.on('drain', buildCacheCount_Drain);
+        buildCacheCount_client.connect(buildCacheCount_clientError);
+
+        /**
+          start the cache building process
+        **/
+        buildCacheCount_client.query(buildCacheCount_Obj[0], buildCacheCount_clientError)
+            .on('row', buildCacheCount_queryRow)
+            .on('end', buildCacheCount_queryEnd);
+
+    };
 
     //Buffer check error callback
     var bufferCheck_clientError = function (err) {
@@ -232,11 +439,11 @@ if (program.buildcache) {
         bufferCheck_client.connect(bufferCheck_clientError);
 
         //check the buffers
-        for (id in buildcacheChecksObj) {
-            if (buildcacheChecksObj.hasOwnProperty(id)) {
+        for (id in buildCheck_Obj) {
+            if (buildCheck_Obj.hasOwnProperty(id)) {
 
                 //send the sql statements to check the buffers
-                bufferCheck_client.query(buildcacheChecksObj[id], bufferCheck_clientError)
+                bufferCheck_client.query(buildCheck_Obj[id], bufferCheck_clientError)
                     .on('row', bufferCheck_queryRow)
                     .on('end', bufferCheck_queryEnd);
             }
@@ -263,17 +470,9 @@ if (program.buildcache) {
     **/
     var buildBuffer_queryRow = function (row, result) {
         'use strict';
-        if (row.hasOwnProperty('check')) {
-            if (row.check) {
-                console.log(this.name + ' PASSED.');
-            } else {
-                console.log(this.name + ' FAILED.');
-                datatestcheck = false;
-            }
-        } else {
-            return;
-        }
+        return;
     };
+
 
     //when Buffer query ends
     var buildBuffer_queryEnd = function (result) {
@@ -307,9 +506,9 @@ if (program.buildcache) {
         console.log('Building Buffers...');
 
         //build controls - buffers
-        for (id in buildcacheCntrlObj) {
-            if (buildcacheCntrlObj.hasOwnProperty(id)) {
-                buildBuffer_client.query(buildcacheCntrlObj[id], buildBuffer_clientError)
+        for (id in buildBuffer_Obj) {
+            if (buildBuffer_Obj.hasOwnProperty(id)) {
+                buildBuffer_client.query(buildBuffer_Obj[id], buildBuffer_clientError)
                     .on('row', buildBuffer_queryRow)
                     .on('end', buildBuffer_queryEnd);
             }
@@ -392,7 +591,7 @@ if (program.buildcache) {
             id,
             theDistance,
             theName,
-            buildCacheConfig;
+            buildCache_queryConfig;
 
         //openclient and connection for buidling cache
         buildCache_client = new pg.Client(dataBaseConnectionObject);
@@ -404,10 +603,10 @@ if (program.buildcache) {
           in groups of N.  N Determined by buildcacheIncrement
         */
         for (i = 0; i < cnt; i += buildcacheIncrement) {
-            for (id in buildcacheObj) {
-                if (buildcacheObj.hasOwnProperty(id)) {
+            for (id in buildCache_Obj) {
+                if (buildCache_Obj.hasOwnProperty(id)) {
 
-                    buildcacheDistances =  buildcacheObj[id].values.join();
+                    buildcacheDistances =  buildCache_Obj[id].values.join();
 
                     /*
                       check if distance is [0], this indicates
@@ -419,16 +618,16 @@ if (program.buildcache) {
                         buildcacheDistances = 0;
                     } else {
                         //passes an array of numerics values
-                        buildcacheDistances =  buildcacheObj[id].values;
+                        buildcacheDistances =  buildCache_Obj[id].values;
                     }
 
                     theDistance = buildcacheDistances;
-                    theName = buildcacheObj[id].name;
+                    theName = buildCache_Obj[id].name;
 
                     //build config for query
-                    buildCacheConfig = {
+                    buildCache_queryConfig = {
                         name: theName,
-                        text: buildcacheObj[id].text,
+                        text: buildCache_Obj[id].text,
                         values: [buildcacheIncrement, i, theDistance]
                     };
 
@@ -436,7 +635,7 @@ if (program.buildcache) {
                       send query for building cache in groups of N
                       N is determeined by buildcacheIncrement
                     */
-                    buildCache_client.query(buildCacheConfig, buildCache_clientError)
+                    buildCache_client.query(buildCache_queryConfig, buildCache_clientError)
                         .on('row', buildCache_queryRow)
                         .on('end', buildCache_queryEnd);
                 }
@@ -444,7 +643,8 @@ if (program.buildcache) {
         }
     };
 
-
+    //run build cache
+    buildCacheCount();
 }
 
 //sleep function
@@ -459,145 +659,5 @@ var sleep = function (milliSeconds) {
     }
 };
 
-//generic error callback for client,queries
-var clientError = function (err) {
-    'use strict';
-    if (err) {
-        console.error("Error: %s", err);
-    }
-    return err;
-};
 
-
-//when query ends
-var queryEnd = function (result) {
-    'use strict';
-    return result;
-};
-
-var successDrain = function () {
-    'use strict';
-    successClient.end();
-};
-
-
-/**
-  query on row method.
-  for data tests when a row exists named check
-  we use that to determine a pass or fail.
-  when we encounter any fail we change the Tests state to fail with
-  datatestcheck.
-**/
-var queryRow = function (row, result) {
-    'use strict';
-    if (row.hasOwnProperty('check')) {
-        if (row.check) {
-            console.log(this.name + ' PASSED.');
-        } else {
-            console.log(this.name + ' FAILED.');
-            datatestcheck = false;
-        }
-    } else {
-        return;
-    }
-};
-
-
-
-/**
-  On Row event for the Building  data proccesing jobs
-**/
-var queryBuildRow = function (row, result) {
-    'use strict';
-    //check row count
-    if (row.count) {
-        cnt = row.count;
-
-        //must have more that one address to work
-        if (cnt <  1) {
-            console.error('Building a cache requires more than one record in the address table.');
-        } else {
-            console.log('total address count: ' + cnt);
-            //if more than 1 address build the buffer layer
-            buildBuffer();
-        }
-
-    } else {
-        //the query to check the number of addresses must have an integer field named count
-        console.error('Must have a column named count!');
-    }
-};
-
-
-
-
-/**
-    drain for main client.
-    when this is a data test this will spawn a new client to
-    handle the sql for updateing the production table
-**/
-var clientDrain = function () {
-    'use strict';
-    client.end();
-    if (program.datatest) {
-        if (!checkrun) {
-            console.log(dataTests.testname + ' Test Results: ' + datatestcheck);
-        }
-        if (datatestcheck && !checkrun) {
-            console.log(dataTests.testname + ' Test Results: ' + datatestcheck);
-            var sqlcommands = dataTests.onsuccess;
-            var sql;
-            for (sql in sqlcommands) {
-                if (sqlcommands.hasOwnProperty(sql)) {
-                    successClient = new pg.Client(dataBaseConnectionObject);
-                    successClient.on('drain', successDrain);
-                    successClient.connect(clientError);
-                    //console.log(sqlcommands[sql]);
-                    checkrun = true;
-                    successClient.query(sqlcommands[sql], clientError)
-                        .on('row', queryRow)
-                        .on('end', queryEnd);
-                }
-            }
-        }
-    }
-};
-
-
-
-
-
-
-client = new pg.Client(dataBaseConnectionObject);
-client.on('drain', clientDrain);
-client.connect(clientError);
-
-//build process
-if (program.buildcache) {
-
-    //should be only one sql statement here so assume [0]
-    queryConfig = buildcacheCntObj[0];
-    /**
-      start the cache building process
-    **/
-    query = client.query(queryConfig, clientError)
-        .on('row', queryBuildRow)
-        .on('end', queryEnd);
-}
-
-//data tests
-if (program.datatest) {
-    for (sql in dataTestsObj) {
-        if (dataTestsObj.hasOwnProperty(sql)) {
-            queryConfig = dataTestsObj[sql];
-            query = client.query(queryConfig, clientError)
-                .on('row', queryRow)
-                .on('end', queryEnd);
-        }
-    }
-}
-
-
-//time query to ensure end client ends
-query = client.query('SELECT NOW()', clientError);
 pg.end();
