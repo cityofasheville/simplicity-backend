@@ -187,13 +187,11 @@ buffer - this is used to create the buffer layer.  Data will process once this s
 
 buffercheck - quick check to make sure buffer data is valid and was created successfully. Data will not process until checks are passed.
 
-###*Rule:*  
+####*Buffer Check Rule:*  
 * The SQL statement must have one field that returns a boolean named exactly "check".
 * The SQL statement must return one row
 
-buildcache - SQL statments to collect data for each buffer.  Needs distances in the values to create entries for each distance.  The distances must exist in the buffer layer.
-
-in the section buildcache a [0] in the values for the indicates no buffers used.
+buildcache - SQL statments to collect data for each buffer.  Needs distances in values to create entries for each distance.  The distances must exist in the buffer layer.  **Note:** in the section buildcache a [0] in the values for the indicates no buffers used.
 
 ```yaml
 increment: 100
