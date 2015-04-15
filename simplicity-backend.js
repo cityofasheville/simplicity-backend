@@ -335,7 +335,6 @@ if (program.buildcache) {
     var buildcacheSleep = buildcache_YAML.sleep;
     var buildcacheDistances;
     var buildcacheCheckPass = true;
-    var buildcach = queryConfig;
 
     //Cache Count error callback
     var  buildCacheCount_clientError = function (err) {
@@ -345,7 +344,6 @@ if (program.buildcache) {
         }
         return err;
     };
-
 
     //when all cache buildCacheCount queries end kill the client connection
     var buildCacheCount_Drain = function () {
@@ -691,6 +689,5 @@ var sleep = function (milliSeconds) {
     while (new Date().getTime() < startTime + milliSeconds) {
     }
 };
-
 
 pg.end();
