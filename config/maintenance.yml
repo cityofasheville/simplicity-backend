@@ -29,6 +29,39 @@ sql:
 - name: Update pid in crime table
   text: UPDATE gisowner.coa_opendata_crime_hold SET pid = subquery.pid  FROM (SELECT objectid, row_number() OVER (ORDER BY (objectid))::integer as pid FROM gisowner.coa_opendata_crime_hold)  subquery WHERE subquery.objectid = coa_opendata_crime_hold.objectid
   values:
+- name: reindex buffer shape
+  text: REINDEX INDEX gisowner.coa_address_buffers_cache_hold_shape;
+  values:
+- name: reindex address shape
+  text: REINDEX INDEX gisowner.coa_opendata_address_hold_shape;
+  values:
+- name: reindex neighborhood shape
+  text: REINDEX INDEX gisowner.coa_opendata_asheville_neighborhoods_hold_shape;
+  values:
+- name: reindex city limits shape
+  text: REINDEX INDEX gisowner.coa_opendata_city_limits_hold_shape;
+  values:
+- name: reindex crime shape
+  text: REINDEX INDEX gisowner.coa_opendata_crime_hold_shape;
+  values:
+- name: reindex permits shape
+  text: REINDEX INDEX gisowner.coa_opendata_permits_hold_shape;
+  values:
+- name: reindex property shape
+  text: REINDEX INDEX gisowner.coa_opendata_property_hold_shape;
+  values:
+- name: reindex sanitation shape
+  text: REINDEX INDEX gisowner.coa_opendata_sanitation_districts_hold_shape;
+  values:
+- name: reindex streets shape
+  text: REINDEX INDEX gisowner.coa_opendata_streets_hold_shape;
+  values:
+- name: reindex zoning shape
+  text: REINDEX INDEX gisowner.coa_opendata_zoning_hold_shape;
+  values:
+- name: reindex overlays shape
+  text: REINDEX INDEX gisowner.coa_opendata_zoning_overlays_hold_shape;
+  values:
 - name: VACUUM gisowner.coa_opendata_address_hold
   text: VACUUM ANALYZE gisowner.coa_opendata_address_hold;
   values:
