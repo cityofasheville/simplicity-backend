@@ -198,11 +198,11 @@ in the section buildcache a [0] in the values for the indicates no buffers used.
 ```yaml
 increment: 100
 sleep: 0
-control:
 count:
 - name: count
   text: SELECT count(*) as count FROM postgres.locations_table1_hold;
   values:
+control:
 - name: truncate buffers
   text: TRUNCATE table postgres.locations_buffers_cache_hold;
   values:
@@ -221,12 +221,6 @@ count:
 - name: Resequence Cache HOLD
   text: ALTER SEQUENCE postgres.data_cache_hold_objectid_seq RESTART WITH 1;;
   values:
-- name: ReIndex Buffer Shapes
-  text: REINDEX INDEX postgres.locations_buffers_cache_hold_shape;
-  values:
-- name: ReIndex Neighborhood Shapes
-  text: REINDEX INDEX postgres.neighborhoods_hold_shape;
-  values:
 - name: ReIndex City Limits Shapes
   text: REINDEX INDEX postgres.city_limits_hold_shape;
   values:
@@ -235,21 +229,6 @@ count:
   values:
 - name: ReIndex Permit Shapes
   text: REINDEX INDEX postgres.permits_hold_shape;
-  values:
-- name: ReIndex Property Shapes
-  text: REINDEX INDEX postgres.property_hold_shape;
-  values:
-- name: ReIndex Sanitation Shapes
-  text: REINDEX INDEX postgres.sanitation_districts_hold_shape;
-  values:
-- name: ReIndex Sanitation Shapes
-  text: REINDEX INDEX postgres.streets_hold_shape;
-  values:
-- name: ReIndex Zoning Shapes
-  text: REINDEX INDEX postgres.zoning_hold_shape;
-  values:
-- name: ReIndex Zoning Overlays Shapes
-  text: REINDEX INDEX postgres.zoning_overlays_hold_shape;
   values:
 - name: vaucum cache
   text: VACUUM ANALYZE postgres.data_cache_hold;
@@ -263,14 +242,15 @@ buffercheck:
   values:
 buildcache:
 - name: Crime
-  text: INSERT INTO postgres.data_cache_hold (SELECT DISTINCT avw.locationid, 'CRIME'::varchar(150) as type, avw.distance as distance, (SELECT string_agg(tp,',')::text FROM (SELECT b.pid::text as tp FROM postgres.crime_hol b WHERE st_contains(avw.shape,b.shape )) as hold)::text as data,''::text datajson FROM gisowner.coa_address_buffers_cache_hold AS avw LEFT JOIN gisowner.coa_address_buffers_cache_hold buf ON buf.locationid = avw.locationid LEFT JOIN gisowner.coa_opendata_address_hold addr ON addr.locationid = buf.locationid WHERE avw.distance = ANY($3::numeric[]) and avw.locationid in (select locationid from gisowner.coa_opendata_address_hold order by locationid limit $1 offset $2))
+  text: INSERT INTO postgres.locations_buffers_cache_hold (SELECT DISTINCT avw.locationid, 'CRIME'::varchar(150) as type, avw.distance as distance, (SELECT string_agg(tp,',')::text FROM (SELECT b.crimeid::text as tp FROM postgres.crime_hold_shape b WHERE st_contains(avw.shape,b.shape )) as hold)::text as data,''::text datajson FROM postgres.locations_buffers_cache_hold AS avw LEFT JOIN postgres.locations_buffers_cache_hold buf ON buf.locationid = avw.locationid LEFT JOIN postgres.crime_hold_shape addr ON addr.locationid = buf.locationid WHERE avw.distance = ANY($3::numeric[]) and avw.locationid in (select locationid from postgres.crime_hold_shape order by locationid limit $1 offset $2))
   values: [82.5000,660.0000,1320.0000,330.0000,65.0000]
 - name: Permits
-  text: INSERT INTO postgres.data_cache_hold (SELECT DISTINCT avw.locationid,'PERMITS'::varchar(150) as type, avw.distance as distance, (SELECT string_agg(tp,',')::text FROM (SELECT DISTINCT b.apn::text as tp FROM gisowner.coa_opendata_permits_hold b WHERE st_contains(avw.shape,b.shape) ) as hold)::text as data, ''::text datajson FROM gisowner.coa_address_buffers_cache_hold AS avw LEFT JOIN gisowner.coa_address_buffers_cache_hold buf ON buf.locationid = avw.locationid LEFT JOIN gisowner.coa_opendata_address_hold addr ON addr.locationid = buf.locationid WHERE avw.distance = ANY($3::numeric[]) and avw.locationid in (select locationid from gisowner.coa_opendata_address_hold order by locationid limit $1 offset $2))
+  text: INSERT INTO postgres.locations_buffers_cache_hold (SELECT DISTINCT avw.locationid,'PERMITS'::varchar(150) as type, avw.distance as distance, (SELECT string_agg(tp,',')::text FROM (SELECT DISTINCT b.apn::text as tp FROM postgres.permits_hold b WHERE st_contains(avw.shape,b.shape) ) as hold)::text as data, ''::text datajson FROM postgres.locations_buffers_cache_hold AS avw LEFT JOIN postgres.locations_buffers_cache_hold buf ON buf.locationid = avw.locationid LEFT JOIN postgres.crime_hold_shape addr ON addr.locationid = buf.locationid WHERE avw.distance = ANY($3::numeric[]) and avw.locationid in (select locationid from postgres.crime_hold_shape order by locationid limit $1 offset $2))
   values: [82.5000,660.0000,1320.0000,330.0000,65.0000]
 - name: Address In City
-  text: INSERT INTO postgres.data_cache_hold (SELECT DISTINCT civx.locationid, 'ADDRESS IN CITY'::varchar(150) as type,$3::numeric(38,8) as distance,CASE WHEN (SELECT string_agg(tp,',')::text FROM (SELECT b.jurisdiction_type::text as tp FROM gisowner.coa_opendata_city_limits_hold b WHERE st_intersects(addr.shape,b.shape))  as hold)::varchar(255) like '%Asheville Corporate Limits%' THEN 'YES' ELSE 'NO' END as data FROM gisowner.coa_opendata_property_hold as a LEFT JOIN gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold civx ON civx.pinnum = a.pinnum LEFT JOIN gisowner.coa_opendata_address_hold addr ON addr.locationid = civx.locationid WHERE addr.locationid in (select distinct locationid from gisowner.coa_opendata_address_hold order by locationid limit $1 offset $2));
+  text: INSERT INTO postgres.locations_buffers_cache_hold (SELECT DISTINCT civx.locationid, 'ADDRESS IN CITY'::varchar(150) as type,$3::numeric(38,8) as distance,CASE WHEN (SELECT string_agg(tp,',')::text FROM (SELECT b.jurisdiction_type::text as tp FROM postgres.city_limits_hold_shape b WHERE st_intersects(addr.shape,b.shape))  as hold)::varchar(255) like '%Asheville Corporate Limits%' THEN 'YES' ELSE 'NO' END as data FROM postgres.property_hold as a LEFT JOIN postgres.pinnum_centerline_xref_view_hold civx ON civx.pinnum = a.pinnum LEFT JOIN postgres.locations_table1_hold addr ON addr.locationid = civx.locationid WHERE addr.locationid in (select distinct locationid from postgres.locations_table1_hold order by locationid limit $1 offset $2));
   values: [0]
+
 ```
 
 ####running:
