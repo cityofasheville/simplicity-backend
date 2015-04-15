@@ -131,7 +131,7 @@ edit `config/process.yml` and update with your settings.
 ###*Rule:*  
 * The Count SQL statement must have one field that returns a integer named exactly "count".
 * The Count SQL statement must return a number greater than 1.
-*Awesomes there is a view that takes care of buffers*
+*Assumes there is a view that takes care of buffers with all the distances already*
 
 In this sample 2264 is the projection of NC State Plane.  Adjust the the Projection code to match your projections code.
 
