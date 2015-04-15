@@ -11,5 +11,8 @@ tests:
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_address_hold;
   values: [10000]
 - name: count neighborhood in address
-  text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_property_hold WHERE neighborhood is not null;
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_address_hold WHERE neighborhood is not null;
   values: [-2]
+- name: location type
+  text: SELECT DISTINCT COUNT(location_type) OVER() > $1 as check FROM gisowner.coa_opendata_address_hold GROUP BY location_type HAVING COUNT(location_type) > 0 ;
+  values: [3]
