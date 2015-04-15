@@ -89,7 +89,7 @@ if (program.maintenance) {
     var complete = '';
 
     /**
-      query end callbacl for maintenance
+      query end callback for maintenance
       provides feedback about progress and status of build
     **/
     var maintenance_queryEnd = function (result) {
@@ -105,6 +105,9 @@ if (program.maintenance) {
 
     };
 
+    /*
+      main function for runnong sql based maintenace      
+    */
     var maintenance = function () {
         'use strict';
 
