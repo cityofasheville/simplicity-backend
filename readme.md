@@ -276,7 +276,7 @@ buildcache:
 ####running:
 
 ```sh
-$ node simplicity-backend.js -d config/db.yml -c config/processyml
+$ node simplicity-backend.js -d config/db.yml -c config/process.yml
 ```
 
 ####returns:
