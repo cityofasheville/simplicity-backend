@@ -4,7 +4,7 @@ onsuccess:
   text: TRUNCATE TABLE gisowner.coa_opendata_streets;
   values:
 - name: insert Streets
-  text: INSERT INTO gisowner.coa_opendata_streets (SELECT * FROM gisowner.coa_opendata_sanitation_districts_hold);
+  text: INSERT INTO gisowner.coa_opendata_streets (SELECT * FROM gisowner.coa_opendata_streets_hold);
   values:
 tests:
 - name: count Streets

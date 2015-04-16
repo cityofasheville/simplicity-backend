@@ -12,4 +12,4 @@ tests:
   values: [10]
 - name: count Name in Neighborhoods
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_asheville_neighborhoods_hold WHERE name is not null;
-  values: [100]
+  values: [10]

@@ -34,7 +34,7 @@ var sleep = function (milliSeconds) {
 };
 
 function msToTime(duration) {
-    var milliseconds = parseInt((duration%1000)/100)
+    var milliseconds = duration
        , seconds = parseInt((duration/1000)%60)
        , minutes = parseInt((duration/(1000*60))%60)
        , hours = parseInt((duration/(1000*60*60))%24);
@@ -60,6 +60,8 @@ _____        _          _______        _
   the argiument must be a yaml file
 **/
 if (program.datatest) {
+    var startTime = new Date().getTime();
+    var endTime;
 
     //objects
     var dataTests_YAML = yaml.load(program.datatest);
@@ -79,13 +81,13 @@ if (program.datatest) {
 
         //all tests completed and one of them failed
         if (!datatestcheck) {
-            console.log(dataTests_YAML.testname + ' Test Results: ' + datatestcheck);
+            console.log('FAILED test(s) for: ' + dataTests_YAML.testname + '.');
             console.log('Failed a test!  Cache will not be built! Please see the log for details');
         }
 
         //all tests completed and succesfull
         if (datatestcheck && !checkrun) {
-            console.log(dataTests_YAML.testname + ' Test Results: ' + datatestcheck);
+            console.log('PASSED all tests for: ' + dataTests_YAML.testname + '.');
             dataTestsSuccess();
         }
     };
@@ -110,9 +112,9 @@ if (program.datatest) {
         'use strict';
         if (row.hasOwnProperty('check')) {
             if (row.check) {
-                console.log('  ' + this.name + ' PASSED.');
+                console.log('  PASSED: ' + this.name);
             } else {
-                console.log('  ' + this.name + ' FAILED.');
+                console.log('  FAILED: ' + this.name);
                 datatestcheck = false;
             }
         } else {
@@ -197,6 +199,15 @@ if (program.datatest) {
         //messages for showing progress
         console.log('  Running ' + this.name + ' ' + dataTestsSuccess_complete + '% completed');
         dataTestsSuccess_rowcount = dataTestsSuccess_rowcount + 1;
+
+        if (dataTestsSuccess_rowcount === dataTests_YAML.onsuccess.length) {
+            endTime = new Date().getTime()
+
+            var aTime = endTime - startTime;
+            var  timeMessage = msToTime(aTime);
+            console.log('Completd Data test in ' + timeMessage);
+            console.log(' ');
+        }
     };
 
     //data tests success full run these queries
@@ -236,6 +247,8 @@ __  __       _       _
 
 */
 if (program.maintenance) {
+    var startTime = new Date().getTime();
+    var endTime;
 
     //load maintenance yaml
     var maintenance_YAML = yaml.load(program.maintenance);
@@ -293,9 +306,14 @@ if (program.maintenance) {
         rowcount = rowcount + 1;
 
         if (rowcount === maintenance_Obj.length) {
-            console.log("Completed Maintenance.");
+
+            endTime = new Date().getTime()
+
+            var aTime = endTime - startTime;
+            var  timeMessage = msToTime(aTime);
+            console.log('Completed Maintenance in ' + timeMessage + '.');
+            console.log(' ');
         }
-        //c
     };
 
     /*
@@ -541,20 +559,14 @@ if (program.buildcache) {
     **/
     var buildBuffer_queryRow = function (row, result) {
         'use strict';
-        return;
+        console.log('    Building ' + this.name);
+        return row;
     };
 
 
     //when Buffer query ends
     var buildBuffer_queryEnd = function (result) {
         'use strict';
-        if (rowcount === 3) {
-            rowcount = 0;
-            dot = '';
-        }
-        rowcount = rowcount + 1;
-        dot = dot + '.';
-        console.log('    Building ' + dot);
         return result;
     };
 
@@ -607,7 +619,7 @@ if (program.buildcache) {
         endTime = new Date().getTime()
         var aTime = endTime - startTime;
         sleep(1000);
-        var  timeMessage = msToTim(aTime);
+        var  timeMessage = msToTime(aTime);
         console.log('Completd Build of Cache in ' + timeMessage);
     }
 

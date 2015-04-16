@@ -19,9 +19,6 @@ tests:
 - name: centerline_id count
   text: SELECT DISTINCT COUNT(centerline_id) OVER() > $1 as check FROM gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold GROUP BY centerline_id HAVING COUNT(centerline_id) > 0 ;
   values: [1000]
-- name:  changes in last week
-  text: SELECT COALESCE( ( SELECT count(*) FROM gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold WHERE  EXTRACT(WEEK FROM change_date) = EXTRACT(WEEK FROM now()) and EXTRACT(YEAR FROM change_date) = EXTRACT(YEAR FROM now())),0) > $1 as check;
-  values: [0]
 - name:  changes have multiple years
   text: SELECT DISTINCT COUNT(EXTRACT(YEAR FROM change_date)) OVER() > $1 as check FROM gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold GROUP BY EXTRACT(YEAR FROM change_date) HAVING COUNT(EXTRACT(YEAR FROM change_date)) > 0 ;
-  values: [3]
+  values: [2]

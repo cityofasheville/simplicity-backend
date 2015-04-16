@@ -14,8 +14,8 @@ tests:
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_property_hold WHERE neighborhood is not null;
   values: [100]
 - name: pinnum count
-  text: SELECT DISTINCT COUNT(pinnum) OVER() > $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY pinnum HAVING COUNT(pinnum) > 0;
+  text: SELECT DISTINCT COUNT(pinnum) OVER() > $1 as check FROM gisowner.coa_opendata_property_hold GROUP BY pinnum HAVING COUNT(pinnum) > 0;
   values: [1000]
 - name: owner name count
-  text: SELECT DISTINCT COUNT(owner) OVER() > $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY owner HAVING COUNT(owner) > 0;
+  text: SELECT DISTINCT COUNT(owner) OVER() > $1 as check FROM gisowner.coa_opendata_property_hold GROUP BY owner HAVING COUNT(owner) > 0;
   values: [1000]

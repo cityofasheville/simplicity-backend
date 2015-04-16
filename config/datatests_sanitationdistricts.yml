@@ -11,11 +11,11 @@ tests:
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_sanitation_districts_hold;
   values: [100]
 - name: truckday count
-  text: SELECT DISTINCT COUNT(truckday) OVER() > $1 as check FROM gisowner.coa_opendata_sanitation_districts_hold GROUP BY truckday HAVING COUNT(truckday) > 0 ;
+  text: SELECT DISTINCT COUNT(truckday) OVER() > $1 as check FROM gisowner.coa_opendata_sanitation_districts_hold GROUP BY truckday HAVING COUNT(truckday) > 0;
   values: [3]
 - name: recday count
-  text: SELECT DISTINCT COUNT(recday) OVER() > $1 as check FROM gisowner.coa_opendata_sanitation_districts_hold GROUP BY recday HAVING COUNT(recday) > 0 ;
+  text: SELECT DISTINCT COUNT(recday) OVER() > $1 as check FROM gisowner.coa_opendata_sanitation_districts_hold GROUP BY recday HAVING COUNT(recday) > 0;
   values: [3]
 - name: recdistrict count
-  text: SELECT DISTINCT COUNT(recdistrict) OVER() > $1 as check FROM gisowner.coa_opendata_sanitation_districts_hold GROUP BY recdistrict HAVING COUNT(recdistrict) > 0 ;
+  text: SELECT DISTINCT COUNT(recdistrict) OVER() > $1 as check FROM gisowner.coa_opendata_sanitation_districts_hold GROUP BY recdistrict HAVING COUNT(recdistrict) > 0;
   values: [1]

@@ -11,7 +11,7 @@ tests:
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_zoning_hold;
   values: [100]
 - name: count districts in Zoning
-  text: SELECT DISTINCT COUNT(districts) OVER() > $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY districts HAVING COUNT(districts) > 0;
+  text: SELECT DISTINCT COUNT(districts) OVER() > $1 as check FROM gisowner.coa_opendata_zoning_hold GROUP BY districts HAVING COUNT(districts) > 0;
   values: [10]
 - name: location districts
   text: SELECT DISTINCT COUNT(districts) OVER() > $1 as check FROM gisowner.coa_opendata_zoning_hold GROUP BY districts HAVING COUNT(districts) > 0 ;
