@@ -1,10 +1,4 @@
 sql:
-- name: reindex gisowner.coa_opendata_address
-  text: REINDEX TABLE gisowner.coa_opendata_address;
-  values:
-- name: reindex gisowner.coa_opendata_address_hold
-  text: REINDEX TABLE gisowner.coa_opendata_address;
-  values:
 - name: Update Neighborhoods in crime table
   text: UPDATE gisowner.coa_opendata_crime_hold as a SET neighborhood = (SELECT string_agg(tp,',')::text FROM (SELECT b.name::text as tp FROM gisowner.coa_opendata_asheville_neighborhoods_hold b WHERE st_intersects(b.shape,a.shape) ) as hold)::text;
   values:
@@ -62,18 +56,117 @@ sql:
 - name: reindex overlays shape
   text: REINDEX INDEX gisowner.coa_opendata_zoning_overlays_hold_shape;
   values:
+- name: reindex buffers primary key
+  text: REINDEX INDEX gisowner.idx_civicaddress_id_coa_address_buffers_cache;
+  values:
+- name: reindex a9
+  text: REINDEX INDEX gisowner.a9_ix1;
+  values:
+- name: reindex a13
+  text: REINDEX INDEX gisowner.a13_ix1;
+  values:
+- name: reindex a18
+  text: REINDEX INDEX gisowner.a18_ix1;
+  values:
+- name: reindex a16
+  text: REINDEX INDEX gisowner.a16_ix1;
+  values:
+- name: reindex a15
+  text: REINDEX INDEX gisowner.a15_ix1;
+  values:
+- name: reindex a17
+  text: REINDEX INDEX gisowner.a17_ix1;
+  values:
+- name: reindex a14
+  text: REINDEX INDEX gisowner.a14_ix1;
+  values:
+- name: reindex a21
+  text: REINDEX INDEX gisowner.a21_ix1;
+  values:
+- name: reindex a20
+  text: REINDEX INDEX gisowner.a20_ix1;
+  values:
+- name: reindex a12
+  text: REINDEX INDEX gisowner.a12_ix1;
+  values:
+- name: reindex a19
+  text: REINDEX INDEX gisowner.a19_ix1;
+  values:
+- name: reindex buffers
+  text: REINDEX TABLE gisowner.coa_address_buffers_cache_hold;
+  values:
+- name: reindex addresses
+  text: REINDEX TABLE gisowner.coa_opendata_address_hold;
+  values:
+- name: reindex neighboorhoods
+  text: REINDEX TABLE gisowner.coa_opendata_asheville_neighborhoods_hold;
+  values:
+- name: reindex city limits
+  text: REINDEX TABLE gisowner.coa_opendata_city_limits_hold;
+  values:
+- name: reindex crime
+  text: REINDEX TABLE gisowner.coa_opendata_crime_hold;
+  values:
+- name: reindex permits
+  text: REINDEX TABLE gisowner.coa_opendata_permits_hold;
+  values:
+- name: reindex property
+  text: REINDEX TABLE gisowner.coa_opendata_property_hold;
+  values:
+- name: reindex sanitation districts
+  text: REINDEX TABLE gisowner.coa_opendata_sanitation_districts_hold;
+  values:
+- name: reindex streets
+  text: REINDEX TABLE gisowner.coa_opendata_streets_hold;
+  values:
+- name: reindex zoning
+  text: REINDEX TABLE gisowner.coa_opendata_zoning_hold;
+  values:
+- name: reindex overlays
+  text: REINDEX TABLE gisowner.coa_opendata_zoning_overlays_hold;
+  values:
+- name: VACUUM gisowner.coa_address_azimuthal_from_street_view_hold
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_address_azimuthal_from_street_view_hold;
+  values:
+- name: VACUUM gisowner.coa_address_buffers_cache_hold
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_address_buffers_cache_hold;
+  values:
+- name: VACUUM gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold;
+  values:
 - name: VACUUM gisowner.coa_opendata_address_hold
-  text: VACUUM ANALYZE gisowner.coa_opendata_address_hold;
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_address_hold;
   values:
-- name: VACUUM gisowner.coa_opendata_address
-  text: VACUUM ANALYZE gisowner.coa_opendata_address;
+- name: VACUUM gisowner.coa_opendata_asheville_neighborhoods_hold
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_asheville_neighborhoods_hold;
   values:
-- name: VACUUM gisowner.coa_opendata_permits_hold
-  text: VACUUM ANALYZE gisowner.coa_opendata_permits_hold;
+- name: VACUUM gisowner.coa_opendata_city_limits_hold
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_city_limits_hold;
   values:
 - name: VACUUM gisowner.coa_opendata_crime_hold
-  text: VACUUM ANALYZE gisowner.coa_opendata_crime_hold;
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_crime_hold;
+  values:
+- name: VACUUM gisowner.coa_opendata_permits_hold
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_permits_hold;
+  values:
+- name: VACUUM gisowner.coa_opendata_property_hold
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_property_hold;
+  values:
+- name: VACUUM gisowner.coa_opendata_sanitation_districts_hold
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_sanitation_districts_hold;
   values:
 - name: VACUUM gisowner.coa_opendata_streets_hold
-  text: VACUUM ANALYZE gisowner.coa_opendata_streets_hold;
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_streets_hold;
+  values:
+- name: VACUUM gisowner.coa_opendata_zoning_hold
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_zoning_hold;
+  values:
+- name: VACUUM gisowner.coa_opendata_zoning_overlays_hold
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_zoning_overlays_hold;
+  values:
+- name: VACUUM gisowner.coa_overlay_data_cache_hold
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_overlay_data_cache_hold;
+  values:
+- name: VACUUM gisowner.coa_street_name_cache_hold
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_street_name_cache_hold;
   values:

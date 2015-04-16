@@ -1,0 +1,112 @@
+sql:
+- name: reindex a9
+  text: REINDEX INDEX gisowner.a9_ix1;
+  values:
+- name: reindex a13
+  text: REINDEX INDEX gisowner.a13_ix1;
+  values:
+- name: reindex a18
+  text: REINDEX INDEX gisowner.a18_ix1;
+  values:
+- name: reindex a16
+  text: REINDEX INDEX gisowner.a16_ix1;
+  values:
+- name: reindex a15
+  text: REINDEX INDEX gisowner.a15_ix1;
+  values:
+- name: reindex a17
+  text: REINDEX INDEX gisowner.a17_ix1;
+  values:
+- name: reindex a14
+  text: REINDEX INDEX gisowner.a14_ix1;
+  values:
+- name: reindex a21
+  text: REINDEX INDEX gisowner.a21_ix1;
+  values:
+- name: reindex a20
+  text: REINDEX INDEX gisowner.a20_ix1;
+  values:
+- name: reindex a12
+  text: REINDEX INDEX gisowner.a12_ix1;
+  values:
+- name: reindex a19
+  text: REINDEX INDEX gisowner.a19_ix1;
+  values:
+- name: reindex buffers
+  text: REINDEX TABLE gisowner.coa_address_buffers_cache;
+  values:
+- name: reindex addresses
+  text: REINDEX TABLE gisowner.coa_opendata_address;
+  values:
+- name: reindex neighboorhoods
+  text: REINDEX TABLE gisowner.coa_opendata_asheville_neighborhoods;
+  values:
+- name: reindex city limits
+  text: REINDEX TABLE gisowner.coa_opendata_city_limits;
+  values:
+- name: reindex crime
+  text: REINDEX TABLE gisowner.coa_opendata_crime;
+  values:
+- name: reindex permits
+  text: REINDEX TABLE gisowner.coa_opendata_permits;
+  values:
+- name: reindex property
+  text: REINDEX TABLE gisowner.coa_opendata_property;
+  values:
+- name: reindex sanitation districts
+  text: REINDEX TABLE gisowner.coa_opendata_sanitation_districts;
+  values:
+- name: reindex streets
+  text: REINDEX TABLE gisowner.coa_opendata_streets;
+  values:
+- name: reindex zoning
+  text: REINDEX TABLE gisowner.coa_opendata_zoning;
+  values:
+- name: reindex overlays
+  text: REINDEX TABLE gisowner.coa_opendata_zoning_overlays;
+  values:
+- name: VACUUM gisowner.coa_address_azimuthal_from_street_view
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_address_azimuthal_from_street_view;
+  values:
+- name: VACUUM gisowner.coa_address_buffers_cache
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_address_buffers_cache;
+  values:
+- name: VACUUM gisowner.coa_civicaddress_pinnum_centerline_xref_view
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_civicaddress_pinnum_centerline_xref_view;
+  values:
+- name: VACUUM gisowner.coa_opendata_address
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_address;
+  values:
+- name: VACUUM gisowner.coa_opendata_asheville_neighborhoods
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_asheville_neighborhoods;
+  values:
+- name: VACUUM gisowner.coa_opendata_city_limits
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_city_limits;
+  values:
+- name: VACUUM gisowner.coa_opendata_crime
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_crime;
+  values:
+- name: VACUUM gisowner.coa_opendata_permits
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_permits;
+  values:
+- name: VACUUM gisowner.coa_opendata_property
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_property;
+  values:
+- name: VACUUM gisowner.coa_opendata_sanitation_districts
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_sanitation_districts;
+  values:
+- name: VACUUM gisowner.coa_opendata_streets
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_streets;
+  values:
+- name: VACUUM gisowner.coa_opendata_zoning
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_zoning;
+  values:
+- name: VACUUM gisowner.coa_opendata_zoning_overlays
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_opendata_zoning_overlays;
+  values:
+- name: VACUUM gisowner.coa_overlay_data_cache
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_overlay_data_cache;
+  values:
+- name: VACUUM gisowner.coa_street_name_cache
+  text: VACUUM FULL FREEZE ANALYZE gisowner.coa_street_name_cache;
+  values:
