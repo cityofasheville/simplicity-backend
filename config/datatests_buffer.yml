@@ -1,9 +1,9 @@
-testname: crime
+testname: Buffers
 onsuccess:
-- name: truncate crimes
-  text: TRUNCATE TABLE gisowner.coa_address_buffers_cache_hold;
+- name: truncate Buffers
+  text: TRUNCATE TABLE gisowner.coa_address_buffers_cache;
   values:
-- name: insert crimes
+- name: insert Buffers
   text: INSERT INTO gisowner.coa_address_buffers_cache (SELECT * FROM gisowner.coa_address_buffers_cache_hold);
   values:
 tests:

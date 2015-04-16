@@ -1,0 +1,21 @@
+testname: Property
+onsuccess:
+- name: truncate Property
+  text: TRUNCATE TABLE gisowner.coa_opendata_property;
+  values:
+- name: insert Property
+  text: INSERT INTO gisowner.coa_opendata_property (SELECT * FROM gisowner.coa_opendata_property_hold);
+  values:
+tests:
+- name: count Property
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_property_hold;
+  values: [10000]
+- name: count neighborhood in Property
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_property_hold WHERE neighborhood is not null;
+  values: [100]
+- name: pinnum count
+  text: SELECT DISTINCT COUNT(pinnum) OVER() > $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY pinnum HAVING COUNT(pinnum) > 0;
+  values: [1000]
+- name: owner name count
+  text: SELECT DISTINCT COUNT(owner) OVER() > $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY owner HAVING COUNT(owner) > 0;
+  values: [1000]

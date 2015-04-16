@@ -1,0 +1,18 @@
+testname: Zoning Overlays
+onsuccess:
+- name: truncate Zoning Overlays
+  text: TRUNCATE TABLE gisowner.coa_opendata_zoning_overlays;
+  values:
+- name: insert Zoning
+  text: INSERT INTO gisowner.coa_opendata_zoning_overlays (SELECT * FROM gisowner.coa_opendata_zoning_overlays);
+  values:
+tests:
+- name: count Zoning Overlays
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_zoning_overlays;
+  values: [100]
+- name: count overlay_type in Zoning Overlays
+  text: SELECT DISTINCT COUNT(overlay_type) OVER() > $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY overlay_type HAVING COUNT(overlay_type) > 0;
+  values: [10]
+- name:  Overlays overlay_type
+  text: SELECT DISTINCT COUNT(overlay_type) OVER() > $1 as check FROM gisowner.coa_opendata_zoning_overlays GROUP BY overlay_type HAVING COUNT(overlay_type) > 0 ;
+  values: [4]

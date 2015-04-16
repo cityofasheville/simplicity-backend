@@ -1,0 +1,15 @@
+testname: City Limits
+onsuccess:
+- name: truncate city limits
+  text: TRUNCATE TABLE gisowner.coa_opendata_city_limits;
+  values:
+- name: insert City Limits
+  text: INSERT INTO gisowner.coa_opendata_city_limits (SELECT * FROM gisowner.coa_opendata_city_limits_hold);
+  values:
+tests:
+- name: count city limits
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_city_limits_hold;
+  values: [2]
+- name: count city name
+  text: SELECT count(*) => $1 as check FROM gisowner.coa_opendata_crime_hold WHERE jurisdiction_type is not null;
+  values: [1]

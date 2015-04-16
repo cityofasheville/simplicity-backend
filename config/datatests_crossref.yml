@@ -1,0 +1,27 @@
+testname: Cross Reference
+onsuccess:
+- name: truncate Cross Reference
+  text: TRUNCATE TABLE gisowner.coa_civicaddress_pinnum_centerline_xref_view;
+  values:
+- name: insert Cross Reference
+  text: INSERT INTO gisowner.coa_civicaddress_pinnum_centerline_xref_view (SELECT * FROM gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold);
+  values:
+tests:
+- name: count address
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold;
+  values: [10000]
+- name: civicaddress_id count
+  text: SELECT DISTINCT COUNT(civicaddress_id) OVER() > $1 as check FROM gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold GROUP BY civicaddress_id HAVING COUNT(civicaddress_id) > 0 ;
+  values: [1000]
+- name: pinnum count
+  text: SELECT DISTINCT COUNT(pinnum) OVER() > $1 as check FROM gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold GROUP BY pinnum HAVING COUNT(pinnum) > 0 ;
+  values: [1000]
+- name: centerline_id count
+  text: SELECT DISTINCT COUNT(centerline_id) OVER() > $1 as check FROM gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold GROUP BY centerline_id HAVING COUNT(centerline_id) > 0 ;
+  values: [1000]
+- name:  changes in last week
+  text: SELECT COALESCE( ( SELECT count(*) FROM gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold WHERE  EXTRACT(WEEK FROM change_date) = EXTRACT(WEEK FROM now()) and EXTRACT(YEAR FROM change_date) = EXTRACT(YEAR FROM now())),0) > $1 as check;
+  values: [0]
+- name:  changes have multiple years
+  text: SELECT DISTINCT COUNT(EXTRACT(YEAR FROM change_date)) OVER() > $1 as check FROM gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold GROUP BY EXTRACT(YEAR FROM change_date) HAVING COUNT(EXTRACT(YEAR FROM change_date)) > 0 ;
+  values: [3]

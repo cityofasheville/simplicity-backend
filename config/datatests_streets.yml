@@ -1,0 +1,18 @@
+testname: Streets
+onsuccess:
+- name: truncate Streets
+  text: TRUNCATE TABLE gisowner.coa_opendata_streets;
+  values:
+- name: insert Streets
+  text: INSERT INTO gisowner.coa_opendata_streets (SELECT * FROM gisowner.coa_opendata_sanitation_districts_hold);
+  values:
+tests:
+- name: count Streets
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_streets_hold;
+  values: [1000]
+- name: Centerline_id count
+  text: SELECT DISTINCT COUNT(centerline_id) OVER() > $1 as check FROM gisowner.coa_opendata_streets_hold GROUP BY centerline_id HAVING COUNT(centerline_id) > 0 ;
+  values: [1000]
+- name: street_name count
+  text: SELECT DISTINCT COUNT(street_name) OVER() > $1 as check FROM gisowner.coa_opendata_streets_hold GROUP BY street_name HAVING COUNT(street_name) > 0 ;
+  values: [500]

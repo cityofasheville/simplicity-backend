@@ -1,4 +1,4 @@
-testname: crime
+testname: Crimes
 onsuccess:
 - name: truncate crimes
   text: TRUNCATE TABLE gisowner.coa_opendata_crime;

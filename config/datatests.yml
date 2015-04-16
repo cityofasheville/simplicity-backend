@@ -1,4 +1,4 @@
-testname: address
+testname: Address
 onsuccess:
 - name: truncate address
   text: TRUNCATE TABLE gisowner.coa_opendata_address;

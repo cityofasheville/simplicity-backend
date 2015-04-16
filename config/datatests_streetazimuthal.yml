@@ -1,0 +1,15 @@
+testname: Street Azimuthal
+onsuccess:
+- name: truncate Street Azimuthal
+  text: TRUNCATE TABLE gisowner.coa_address_azimuthal_from_street_view;
+  values:
+- name: insert Street Azimuthal
+  text: INSERT INTO gisowner.coa_address_azimuthal_from_street_view (SELECT * FROM gisowner.coa_address_azimuthal_from_street_view_hold);
+  values:
+tests:
+- name: count Street Azimuthal
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_address_azimuthal_from_street_view_hold;
+  values: [10000]
+- name: count civicaddress_id in Neighborhoods
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_address_azimuthal_from_street_view_hold WHERE civicaddress_id is not null;
+  values: [1000]

@@ -1,0 +1,21 @@
+testname: Cache
+onsuccess:
+- name: truncate Cache
+  text: TRUNCATE TABLE gisowner.coa_overlay_data_cache;
+  values:
+- name: insert Cache
+  text: INSERT INTO gisowner.coa_overlay_data_cache (SELECT * FROM gisowner.coa_overlay_data_cache_hold);
+  values:
+tests:
+- name: count Cache
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_address_buffers_cache_hold;
+  values: [10000]
+- name:  count Cache
+  text: SELECT DISTINCT COUNT(distance) OVER() = $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY distance HAVING COUNT(distance) > 0;
+  values: [5]
+- name:  count Cache type
+  text: SELECT DISTINCT COUNT(data) OVER() = $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY data HAVING COUNT(data) > 0;
+  values: [7]
+- name: Count Cache civicaddress_id
+  text: SELECT DISTINCT COUNT(civicaddress_id) OVER() = $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY civicaddress_id HAVING COUNT(civicaddress_id) > 0;
+  values: [100000]

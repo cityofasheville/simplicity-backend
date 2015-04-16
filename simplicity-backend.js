@@ -21,6 +21,31 @@ program
 **/
 var dataBaseConnectionObject = yaml.load(program.databaseconn);
 
+//sleep function
+//short rest to allow for sql insert to complete
+//found that this actuall increases the speed of inserts
+var sleep = function (milliSeconds) {
+    'use strict';
+    var startTime = new Date().getTime(); // get the current time
+
+    //Loop till time change in millisecons matches what was passed in
+    while (new Date().getTime() < startTime + milliSeconds) {
+    }
+};
+
+function msToTime(duration) {
+    var milliseconds = parseInt((duration%1000)/100)
+       , seconds = parseInt((duration/1000)%60)
+       , minutes = parseInt((duration/(1000*60))%60)
+       , hours = parseInt((duration/(1000*60*60))%24);
+
+    hours = (hours < 10) ? "0" + hours : hours;
+    minutes = (minutes < 10) ? "0" + minutes : minutes;
+    seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+    return hours + ":" + minutes + ":" + seconds + "." + milliseconds;
+}
+
 /**
 _____        _          _______        _
 |  __ \      | |        |__   __|      | |
@@ -117,7 +142,8 @@ if (program.datatest) {
 
         var id;
         var dataTests_queryConfig;
-        console.log('Running Test ' + dataTests_YAML.testname)
+        console.log('Running Test ' + dataTests_YAML.testname);
+
         for (id in dataTests_Obj) {
             if (dataTests_Obj.hasOwnProperty(id)) {
 
@@ -174,25 +200,25 @@ if (program.datatest) {
     };
 
     //data tests success full run these queries
-    var dataTestsSuccess = function() {
-      'use strict';
+    var dataTestsSuccess = function () {
+        'use strict';
 
-      //open client and connection for Checking buffers
-      dataTestsSuccess_client = new pg.Client(dataBaseConnectionObject);
-      dataTestsSuccess_client.on('drain', dataTestsSuccess_drain);
-      dataTestsSuccess_client.connect(dataTestsSuccess_clientError);
+        //open client and connection for Checking buffers
+        dataTestsSuccess_client = new pg.Client(dataBaseConnectionObject);
+        dataTestsSuccess_client.on('drain', dataTestsSuccess_drain);
+        dataTestsSuccess_client.connect(dataTestsSuccess_clientError);
 
-      var sqlcommands = dataTests_YAML.onsuccess;
-      var id;
+        var sqlcommands = dataTests_YAML.onsuccess;
+        var id;
 
-      for (id in sqlcommands) {
-          if (sqlcommands.hasOwnProperty(id)) {
-              checkrun = true;
-              dataTestsSuccess_client.query(sqlcommands[id], dataTestsSuccess_clientError)
-                  .on('row', dataTestsSuccess_queryRow)
-                  .on('end', dataTestsSuccess_queryEnd);
-          }
-      }
+        for (id in sqlcommands) {
+            if (sqlcommands.hasOwnProperty(id)) {
+                checkrun = true;
+                dataTestsSuccess_client.query(sqlcommands[id], dataTestsSuccess_clientError)
+                    .on('row', dataTestsSuccess_queryRow)
+                    .on('end', dataTestsSuccess_queryEnd);
+            }
+        }
     };
 
     //run data tests
@@ -311,6 +337,8 @@ ____        _ _     _    _____           _
 |____/ \__,_|_|_|\__,_|  \_____\__,_|\___|_| |_|\___|
 */
 if (program.buildcache) {
+    var startTime = new Date().getTime();
+    var endTime;
     //Load build cache yaml
     var buildcache_YAML = yaml.load(program.buildcache);
 
@@ -520,13 +548,13 @@ if (program.buildcache) {
     //when Buffer query ends
     var buildBuffer_queryEnd = function (result) {
         'use strict';
-        if (rowcount === 3){
-          rowcount = 0;
-          dot = '';
+        if (rowcount === 3) {
+            rowcount = 0;
+            dot = '';
         }
         rowcount = rowcount + 1;
         dot = dot + '.';
-        console.log('    Building ' +dot);
+        console.log('    Building ' + dot);
         return result;
     };
 
@@ -575,10 +603,19 @@ if (program.buildcache) {
         return err;
     };
 
+    var buildCache_end = function () {
+        endTime = new Date().getTime()
+        var aTime = endTime - startTime;
+        sleep(1000);
+        var  timeMessage = msToTim(aTime);
+        console.log('Completd Build of Cache in ' + timeMessage);
+    }
+
     //when all cache buidling queroes end kill the client connection
     var buildCache_Drain = function () {
         'use strict';
         buildCache_client.end();
+        buildCache_end();
         return;
     };
 
@@ -615,7 +652,7 @@ if (program.buildcache) {
         **/
         if (startname === this.name) {
 
-            if (rowcount > 1 ) {
+            if (rowcount > 1) {
                 console.log('  Processing of ' + buildcacheIncrement + ' locations complete. ' + complete + '% completed');
                 console.log('');
             }
@@ -624,10 +661,10 @@ if (program.buildcache) {
             //calculate the percent complete
             complete = ((rowcount / cnt) * 100).toFixed(2);
             dot = '';
-            if (rowcount < 2 ) {
+            if (rowcount < 2) {
                 console.log('  Processing of first ' + buildcacheIncrement + ' locations.');
             } else {
-              console.log('  Processing of next ' + buildcacheIncrement + ' locations.');
+                console.log('  Processing of next ' + buildcacheIncrement + ' locations.');
             }
         } else {
             dot = dot + '.';
@@ -635,6 +672,7 @@ if (program.buildcache) {
 
         //messages for showing progress
         console.log('    ' + this.name + '...' + result.rowCount + ' row(s) returned.');
+
     };
 
     //build the data cache
@@ -701,16 +739,5 @@ if (program.buildcache) {
     buildCacheCount();
 }
 
-//sleep function
-//short rest to allow for sql insert to complete
-//found that this actuall increases the speed of inserts
-var sleep = function (milliSeconds) {
-    'use strict';
-    var startTime = new Date().getTime(); // get the current time
-
-    //Loop till time change in millisecons matches what was passed in
-    while (new Date().getTime() < startTime + milliSeconds) {
-    }
-};
 
 pg.end();

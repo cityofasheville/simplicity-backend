@@ -1,0 +1,15 @@
+testname: Neighborhoods
+onsuccess:
+- name: truncate Neighborhoods
+  text: TRUNCATE TABLE gisowner.coa_opendata_asheville_neighborhoods;
+  values:
+- name: insert Neighborhoods
+  text: INSERT INTO gisowner.coa_opendata_asheville_neighborhoods (SELECT * FROM gisowner.coa_opendata_asheville_neighborhoods_hold);
+  values:
+tests:
+- name: count Neighborhoods
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_asheville_neighborhoods_hold;
+  values: [10]
+- name: count Name in Neighborhoods
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_asheville_neighborhoods_hold WHERE name is not null;
+  values: [100]
