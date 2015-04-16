@@ -332,6 +332,12 @@ if (program.buildcache) {
     var buildcacheDistances;
     var buildcacheCheckPass = true;
 
+    //varrables for buildCache_queryEnd
+    var rowcount = 0;
+    var startname = '';
+    var dot = '';
+    var complete = '';
+
     //Cache Count error callback
     var  buildCacheCount_clientError = function (err) {
         'use strict';
@@ -353,7 +359,8 @@ if (program.buildcache) {
     **/
     var buildCacheCount_queryRow = function (row, result) {
         'use strict';
-
+        console.log('');
+        console.log('Checking Addresses');
         //check row count
         if (row.count) {
             cnt = row.count;
@@ -362,7 +369,10 @@ if (program.buildcache) {
             if (cnt <  1) {
                 console.error('Building a cache requires more than one record in the address table.');
             } else {
-                console.log('total address count: ' + cnt);
+                console.log('  Total address count: ' + cnt + ', Looks okay.');
+                console.log('Address Check Complete');
+                console.log('');
+                console.log('Starting to build Buffers.');
                 //if more than 1 address build the buffer layer
                 buildBuffer();
             }
@@ -416,7 +426,9 @@ if (program.buildcache) {
           build the cache.
         **/
         if (buildcacheCheckPass) {
-            console.log('PASSED All Tests, building Cache!');
+            console.log('PASSED All Tests, Okay to building Cache!');
+            console.log(' ');
+            console.log('Starting to Build Cache');
             buildCache(cnt);
         } else {
             console.log('Failed a test!  Cache will not be built! Please see the log for details.');
@@ -434,9 +446,9 @@ if (program.buildcache) {
         'use strict';
         if (row.hasOwnProperty('check')) {
             if (row.check) {
-                console.log(this.name + ' PASSED.');
+                console.log('  ' + this.name + ' PASSED.');
             } else {
-                console.log(this.name + ' FAILED.');
+                console.log('  ' + this.name + ' FAILED.');
                 buildcacheCheckPass = false;
             }
         } else {
@@ -458,6 +470,10 @@ if (program.buildcache) {
     */
     var bufferCheck = function () {
         'use strict';
+        console.log('Buidling Buffers Complete.');
+        console.log('');
+        console.log('Testing Buffer Data.');
+
         var id;
 
         //open client and connection for Checking buffers
@@ -504,6 +520,13 @@ if (program.buildcache) {
     //when Buffer query ends
     var buildBuffer_queryEnd = function (result) {
         'use strict';
+        if (rowcount === 3){
+          rowcount = 0;
+          dot = '';
+        }
+        rowcount = rowcount + 1;
+        dot = dot + '.';
+        console.log('    Building ' +dot);
         return result;
     };
 
@@ -530,8 +553,8 @@ if (program.buildcache) {
         buildBuffer_client.on('drain', buildBuffer_drain);
         buildBuffer_client.connect(buildBuffer_clientError);
 
-        console.log('Building Buffers...');
-
+        console.log('  Building Buffers...');
+        rowcount = 0;
         //build controls - buffers
         for (id in buildBuffer_Obj) {
             if (buildBuffer_Obj.hasOwnProperty(id)) {
@@ -565,11 +588,6 @@ if (program.buildcache) {
         return row;
     };
 
-    //varrables for buildCache_queryEnd
-    var rowcount = 0;
-    var startname = '';
-    var dot = '';
-    var complete = '';
 
     /**
       query end callvacl for buidling the data cache
@@ -597,23 +615,32 @@ if (program.buildcache) {
         **/
         if (startname === this.name) {
 
+            if (rowcount > 1 ) {
+                console.log('  Processing of ' + buildcacheIncrement + ' locations complete. ' + complete + '% completed');
+                console.log('');
+            }
             rowcount += buildcacheIncrement;
 
             //calculate the percent complete
             complete = ((rowcount / cnt) * 100).toFixed(2);
             dot = '';
-            console.log('Processing next ' + buildcacheIncrement + ' locations, ' + complete + '% completed' + dot);
+            if (rowcount < 2 ) {
+                console.log('  Processing of first ' + buildcacheIncrement + ' locations.');
+            } else {
+              console.log('  Processing of next ' + buildcacheIncrement + ' locations.');
+            }
         } else {
             dot = dot + '.';
         }
 
         //messages for showing progress
-        console.log('  ' + this.name + '...' + result.rowCount + ' row(s) returned.  ');
+        console.log('    ' + this.name + '...' + result.rowCount + ' row(s) returned.');
     };
 
     //build the data cache
     var buildCache = function (cnt) {
         'use strict';
+        rowcount = 0;
         var i = 0,
             id,
             theDistance,

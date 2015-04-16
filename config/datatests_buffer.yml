@@ -1,0 +1,18 @@
+testname: crime
+onsuccess:
+- name: truncate crimes
+  text: TRUNCATE TABLE gisowner.coa_address_buffers_cache_hold;
+  values:
+- name: insert crimes
+  text: INSERT INTO gisowner.coa_address_buffers_cache (SELECT * FROM gisowner.coa_address_buffers_cache_hold);
+  values:
+tests:
+- name: count buffers
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_address_buffers_cache_hold;
+  values: [10000]
+- name: check buffers count vs address
+  text: SELECT( (SELECT COUNT(*) FROM gisowner.coa_address_buffers_cache_hold) = (SELECT COUNT(*) FROM gisowner.coa_opendata_address_hold)*$1) as check
+  values: [5]
+- name:  count distances
+  text: SELECT DISTINCT COUNT(distance) OVER() = $1 as check FROM gisowner.coa_address_buffers_cache_hold GROUP BY distance HAVING COUNT(distance) > 0;
+  values: [5]
