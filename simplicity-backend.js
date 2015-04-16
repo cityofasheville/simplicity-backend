@@ -248,16 +248,17 @@ if (program.maintenance) {
         return err;
     };
 
+    //varrables for maintenance_queryEnd
+    var rowcount = 0;
+    var startname = '';
+    var complete = '';
+
     //maintenance query row callback
     var maintenance_queryRow = function (row, result) {
         'use strict';
         return row;
     };
 
-    //varrables for maintenance_queryEnd
-    var rowcount = 0;
-    var startname = '';
-    var complete = '';
 
     /**
       query end callback for maintenance
@@ -265,15 +266,22 @@ if (program.maintenance) {
     **/
     var maintenance_queryEnd = function (result) {
         'use strict';
-
+        if (rowcount === 0) {
+            console.log('');
+            console.log("Begining Maintenance.");
+        }
         //calculate the percent complete
         startname = this.name;
         complete = ((rowcount / maintenance_Obj.length) * 100).toFixed(2);
 
         //messages for showing progress
-        console.log('Running ' + this.name + ' ' + complete + '% completed');
+        console.log('  Running ' + this.name + ' ' + complete + '% completed');
         rowcount = rowcount + 1;
 
+        if (rowcount === maintenance_Obj.length) {
+            console.log("Completed Maintenance.");
+        }
+        //c
     };
 
     /*
@@ -346,7 +354,7 @@ if (program.buildcache) {
     };
 
     //when all cache buildCacheCount queries end kill the client connection
-    var buildCacheCount_Drain = function () {
+    var buildCacheCount_drain = function () {
         'use strict';
         buildCacheCount_client.end();
         return;
@@ -389,7 +397,7 @@ if (program.buildcache) {
 
         //open client and connection for Checking buffers
         buildCacheCount_client = new pg.Client(dataBaseConnectionObject);
-        buildCacheCount_client.on('drain', buildCacheCount_Drain);
+        buildCacheCount_client.on('drain', buildCacheCount_drain);
         buildCacheCount_client.connect(buildCacheCount_clientError);
 
         /**

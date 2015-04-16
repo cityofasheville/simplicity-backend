@@ -10,6 +10,9 @@ tests:
 - name: count crimes
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_crime_hold;
   values: [10000]
+- name: pid count
+  text: SELECT DISTINCT COUNT(pid) OVER() > $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY pid HAVING COUNT(pid) > 0 ;
+  values: [1000]
 - name: count neighborhood in crime
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_crime_hold WHERE neighborhood is not null;
   values: [100]
@@ -28,3 +31,6 @@ tests:
 - name:  crime in last week
   text: SELECT COALESCE( ( SELECT count(*) FROM gisowner.coa_opendata_crime_hold WHERE  EXTRACT(WEEK FROM thedate) = EXTRACT(WEEK FROM now()) and EXTRACT(YEAR FROM thedate) = EXTRACT(YEAR FROM now())),0) > $1 as check;
   values: [0]
+- name:  crime multiple years
+  text: SELECT DISTINCT COUNT(EXTRACT(YEAR FROM thedate)) OVER() > $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY EXTRACT(YEAR FROM thedate) HAVING COUNT(EXTRACT(YEAR FROM thedate)) > 0 ;
+  values: [3]

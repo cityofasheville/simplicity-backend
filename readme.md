@@ -5,7 +5,7 @@ The simplicity backend powers the [simplicity ui](https://github.com/cityofashev
 ##What the backend accomplishes.
 * Processes data into the format the simplicity ui expects..
 * Verifies correct schema for data **TODO**.
-* Compiles spatial queries in advance **TODO**.
+* Completes spatial queries in advance.
 * Checks data consistency to ensure simplicity app will work properly.
   * Framework in place.
   * Will not push data from hold tables to production tables until data checks PASS
