@@ -559,15 +559,16 @@ if (program.buildcache) {
     **/
     var buildBuffer_queryRow = function (row, result) {
         'use strict';
-        console.log('    Building ' + this.name);
-        return row;
+        console.log('    Step:' + this.name);
+        //return row;
     };
 
 
     //when Buffer query ends
     var buildBuffer_queryEnd = function (result) {
         'use strict';
-        return result;
+        console.log('    ' + this.name);
+        //return result;
     };
 
     //generic error callback for client,queries
