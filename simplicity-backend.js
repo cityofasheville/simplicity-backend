@@ -53,7 +53,7 @@ if (program.datatest) {
         dataTests_client.end();
 
         //all tests completed and one of them failed
-        if (checkrun) {
+        if (!datatestcheck) {
             console.log(dataTests_YAML.testname + ' Test Results: ' + datatestcheck);
             console.log('Failed a test!  Cache will not be built! Please see the log for details');
         }
@@ -103,18 +103,6 @@ if (program.datatest) {
     //when query ends
     var dataTests_queryEnd = function (result) {
         'use strict';
-
-        //if (dataTests_first) {
-        //  dataTests_first = false;
-        //    console.log(dataTests_YAML.testname + ' Running Data check.');
-        //}
-        //calculate the percent complete
-        //dataTests_complete = ((dataTests_rowcount / dataTests_YAML.tests.length) * 100).toFixed(2);
-
-        //messages for showing progress
-        //console.log('  Running ' + this.name + ' ' + dataTests_complete + '% completed');
-        //dataTests_rowcount = dataTests_rowcount + 1;
-
         return result;
     };
 
