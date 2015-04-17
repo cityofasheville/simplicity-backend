@@ -457,17 +457,6 @@ if (program.buildcache) {
 
     };
 
-    var buildBuffer_end = function () {
-        'use strict';
-        console.log(' ');
-        console.log('Completd Buidling of Buffers');
-
-        //rowcount = 99999;
-        //BuildBuffer_ar = [];
-        buildBuffer_client.end();
-        //bufferCheck();
-    }
-
     //Build Buffer error callback
     var buildBuffer_clientError = function (err) {
         'use strict';
@@ -477,15 +466,10 @@ if (program.buildcache) {
         return err;
     };
 
-    var buildBuffer_queryDrain = function () {
-        'use strict';
-         console.log('Query Drain.');
-    };
-
     var buildBuffer_clientDrain = function () {
         'use strict';
          buildBuffer_client.end();
-         //buildBuffer_end();
+         //bufferCheck();
     };
 
     /**
@@ -506,11 +490,6 @@ if (program.buildcache) {
     //when Buffer query ends
     var buildBuffer_queryEnd = function (result) {
         'use strict';
-        //console.log('Query End.');
-        //console.log('    Build: ' + this.name);
-        //console.log('Query End.');
-
-
         //if (rowcount === 99999) {
         //  return result;
         //}
@@ -522,10 +501,9 @@ if (program.buildcache) {
 
         rowcount = rowcount + 1;
         console.log('    Completed: ' + this.name);
-        //console.log(' ');
+        console.log(' ');
 
-        if (rowcount > 0 && rowcount < BuildBuffer_ar.length-1){
-          console.log(' ');
+        if (rowcount > 0 && rowcount < BuildBuffer_ar.length){
           console.log('    Starting: ' +BuildBuffer_ar[rowcount])
         }
         //return result;
