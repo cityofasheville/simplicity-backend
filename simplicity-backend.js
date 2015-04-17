@@ -155,7 +155,7 @@ if (program.datatest) {
             endTime = new Date().getTime()
             var aTime = endTime - startTime;
             var  timeMessage = msToTime(aTime);
-            console.log('Completd in ' + timeMessage);
+            console.log('completed in ' + timeMessage);
             console.log(' ');
         }
 
@@ -271,7 +271,7 @@ if (program.datatest) {
 
         var aTime = endTime - startTime;
         var  timeMessage = msToTime(aTime);
-        console.log('Completd Data Test in ' + timeMessage);
+        console.log('completed Data Test in ' + timeMessage);
         console.log(' ');
 
         return result;
@@ -786,7 +786,7 @@ if (program.buildcache) {
         var aTime = endTime - startTime;
         sleep(1000);
         var  timeMessage = msToTime(aTime);
-        console.log('Completd Build of Cache in ' + timeMessage);
+        console.log('completed Build of Cache in ' + timeMessage);
     }
 
     //when all cache buidling queroes end kill the client connection
