@@ -17,5 +17,5 @@ tests:
   text: SELECT DISTINCT COUNT(location_type) OVER() > $1 as check FROM gisowner.coa_opendata_address_hold GROUP BY location_type HAVING COUNT(location_type) > 0;
   values: [3]
 - name: civicaddress_id count
-  text: SELECT DISTINCT COUNT(civicaddress_id) OVER() > $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY civicaddress_id HAVING COUNT(civicaddress_id) > 0;
+  text: SELECT DISTINCT COUNT(civicaddress_id) OVER() > $1 as check FROM gisowner.coa_opendata_address_hold GROUP BY civicaddress_id HAVING COUNT(civicaddress_id) > 0;
   values: [1000]

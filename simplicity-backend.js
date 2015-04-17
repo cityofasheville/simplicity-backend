@@ -33,11 +33,13 @@ var sleep = function (milliSeconds) {
     }
 };
 
-function msToTime(duration) {
-    var milliseconds = duration
-       , seconds = parseInt((duration/1000)%60)
-       , minutes = parseInt((duration/(1000*60))%60)
-       , hours = parseInt((duration/(1000*60*60))%24);
+//gets duration based on start and end time milliseconds
+var msToTime = function (duration) {
+    'use strict';
+    var milliseconds = duration,
+        seconds = parseInt((duration / 1000) % 60),
+        minutes = parseInt((duration / ( 1000 * 60)) % 60),
+        hours = parseInt((duration / ( 1000 * 60 * 60)) % 24);
 
     hours = (hours < 10) ? "0" + hours : hours;
     minutes = (minutes < 10) ? "0" + minutes : minutes;
@@ -45,6 +47,33 @@ function msToTime(duration) {
 
     return hours + ":" + minutes + ":" + seconds + "." + milliseconds;
 }
+
+var on_queryMessages = function (current, rowcount, arr, secarr) {
+
+
+    //first pass starting
+    if (rowcount === 0) {
+        console.log(' ');
+        console.log('    Starting: ' + arr[rowcount]);
+    }
+
+    //called when completed;
+    console.log('    Completed: ' + current.name);
+    if (typeof secarr != "undefined") {
+        console.log('    ' + secarr[rowcount]);
+    }
+    console.log(' ');
+
+
+    rowcount = rowcount + 1;
+    //if not last call add starting of next one
+    if (rowcount > 0 && rowcount < arr.length) {
+        console.log('    Starting: ' + arr[rowcount]);
+    }
+
+    return rowcount;
+
+};
 
 /**
 _____        _          _______        _
@@ -71,32 +100,57 @@ if (program.datatest) {
     var dataTests_client;
     var dataTestsSuccess_client;
 
-    var datatestcheck = true;
-    var checkrun = false;
+    var dataTests_queryConfig
+    var dataTests_check = true;
+    var dataTests_checkRun = false;
+    var dataTests_count;
+    var dataTests_ar = [];
+    var dataTestsResults_ar = [];
+    var dataTests_rowcount = 0;
+
+
+    //varrables for dataTests_queryEnd
+    //var dataTests_rowcount = 0;
+    //var dataTests_complete = '';
+    //var dataTests_first = true;
+
+    //varrables for dataTestsSuccess_queryEnd
+    var dataTestsSuccess_rowcount = 0;
+    var dataTestsSuccess_complete = '';
+    var dataTestsSuccess_first = true;
+
 
     //data test drain callback when all maintenace queries finish
-    var dataTests_drain = function () {
+    var dataTests_clientDrain = function () {
         'use strict';
         dataTests_client.end();
-
-        //all tests completed and one of them failed
-        if (!datatestcheck) {
-            console.log('FAILED test(s) for: ' + dataTests_YAML.testname + '.');
-            console.log('Failed a test!  Cache will not be built! Please see the log for details');
-        }
-
-        //all tests completed and succesfull
-        if (datatestcheck && !checkrun) {
-            console.log('PASSED all tests for: ' + dataTests_YAML.testname + '.');
-            dataTestsSuccess();
-        }
     };
 
     //generic error callback for client,queries
     var dataTests_clientError = function (err) {
         'use strict';
         if (err) {
-            console.error("Error: %s", err);
+            console.error("Client Error: %s", err);
+            dataTests_check = false;
+        }
+        return err;
+    };
+
+    //generic error callback for client,queries
+    var dataTests_queryError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Query Error: %s", err);
+            dataTests_check = false;
+        }
+        return err;
+    };
+
+    //generic error callback for client,queries
+    var dataTests_connectionError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Connection_Error: %s", err);
         }
         return err;
     };
@@ -106,44 +160,72 @@ if (program.datatest) {
       for data tests when a row exists named check
       we use that to determine a pass or fail.
       when we encounter any fail we change the Tests state to fail with
-      datatestcheck.
+      dataTests_check.
     **/
     var dataTests_queryRow = function (row, result) {
         'use strict';
         if (row.hasOwnProperty('check')) {
             if (row.check) {
-                console.log('  PASSED: ' + this.name);
+                dataTestsResults_ar.push('PASSED');
             } else {
-                console.log('  FAILED: ' + this.name);
-                datatestcheck = false;
+                dataTestsResults_ar.push('FAILED');
+                dataTests_check = false;
             }
         } else {
             return;
         }
     };
 
-    //varrables for dataTests_queryEnd
-    var dataTests_rowcount = 0;
-    var dataTests_complete = '';
-    var dataTests_first = true;
-
     //when query ends
     var dataTests_queryEnd = function (result) {
         'use strict';
+        dataTests_rowcount = on_queryMessages(this, dataTests_rowcount, dataTests_ar, dataTestsResults_ar);
+    };
+
+    //when client ends
+    var dataTests_clientEnd = function (result) {
+        'use strict';
+        console.log('Tests Complete.');
+
+        //all tests completed and one of them failed
+        if (!dataTests_check) {
+
+            //something failed
+            console.log('FAILED test(s) for: ' + dataTests_YAML.testname + '.');
+            console.log('Failed a test!  Cache will not be built! Please see the log for details');
+
+            //time
+            endTime = new Date().getTime()
+            var aTime = endTime - startTime;
+            var  timeMessage = msToTime(aTime);
+            console.log('Completd in ' + timeMessage);
+            console.log(' ');
+        }
+
+        //all tests completed and succesfull
+        if (dataTests_check && !dataTests_checkRun) {
+            console.log('PASSED all tests for: ' + dataTests_YAML.testname + '.');
+            dataTestsSuccess();
+        }
+
         return result;
     };
 
     //data tests functionå
     var dataTests = function () {
         'use strict';
-
-        //open client and connection for Checking buffers
-        dataTests_client = new pg.Client(dataBaseConnectionObject);
-        dataTests_client.on('drain', dataTests_drain);
-        dataTests_client.connect(dataTests_clientError);
-
         var id;
-        var dataTests_queryConfig;
+
+        //open client and connection for Buidling Buffers
+        dataTests_client = new pg.Client(dataBaseConnectionObject)
+            .on('drain', dataTests_clientDrain)
+            .on('error', dataTests_clientError)
+            .on('end', dataTests_clientEnd);
+
+        //connect
+        dataTests_client.connect(dataTests_connectionError);
+
+        console.log(' ');
         console.log('Running Test ' + dataTests_YAML.testname);
 
         for (id in dataTests_Obj) {
@@ -151,7 +233,10 @@ if (program.datatest) {
 
                 dataTests_queryConfig = dataTests_Obj[id];
 
-                dataTests_client.query(dataTests_queryConfig, dataTests_clientError)
+                dataTests_ar.push(dataTests_queryConfig.name);
+
+                dataTests_client.query(dataTests_queryConfig)
+                    .on('error', dataTests_queryError)
                     .on('row', dataTests_queryRow)
                     .on('end', dataTests_queryEnd);
             }
@@ -159,7 +244,7 @@ if (program.datatest) {
     };
 
     //data test sucessfull drain callback when all maintenace queries finish
-    var dataTestsSuccess_drain = function () {
+    var dataTestsSuccess_clientDrain = function () {
         'use strict';
         dataTestsSuccess_client.end();
     };
@@ -168,21 +253,40 @@ if (program.datatest) {
     var dataTestsSuccess_clientError = function (err) {
         'use strict';
         if (err) {
-            console.error("Error: %s", err);
+            console.error("Client Error: %s", err);
         }
         return err;
     };
 
+    //generic error callback for client,queries
+    var dataTestsSuccess_connectionError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Connection Error: %s", err);
+        }
+        return err;
+    };
+
+
+    //when client ends
+    var dataTestsSuccess_clientEnd = function (result) {
+        'use strict';
+        return result;
+    };
     //data tests successful query row callback
     var dataTestsSuccess_queryRow = function (row, result) {
         'use strict';
         return row;
     };
 
-    //varrables for dataTestsSuccess_queryEnd
-    var dataTestsSuccess_rowcount = 0;
-    var dataTestsSuccess_complete = '';
-    var dataTestsSuccess_first = true;
+    //generic error callback for client,queries
+    var dataTestsSuccess_queryError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Query Error: %s", err);
+        }
+        return err;
+    };
 
     //when query ends
     var dataTestsSuccess_queryEnd = function (result) {
@@ -213,19 +317,28 @@ if (program.datatest) {
     //data tests success full run these queries
     var dataTestsSuccess = function () {
         'use strict';
-
-        //open client and connection for Checking buffers
-        dataTestsSuccess_client = new pg.Client(dataBaseConnectionObject);
-        dataTestsSuccess_client.on('drain', dataTestsSuccess_drain);
-        dataTestsSuccess_client.connect(dataTestsSuccess_clientError);
-
-        var sqlcommands = dataTests_YAML.onsuccess;
         var id;
+        var dataTestsSuccess_queryConfig;
+        var dataTests_successCommands = dataTests_YAML.onsuccess;
 
-        for (id in sqlcommands) {
-            if (sqlcommands.hasOwnProperty(id)) {
-                checkrun = true;
-                dataTestsSuccess_client.query(sqlcommands[id], dataTestsSuccess_clientError)
+        //open client and connection for Buidling Buffers
+        dataTestsSuccess_client = new pg.Client(dataBaseConnectionObject)
+            .on('drain', dataTestsSuccess_clientDrain)
+            .on('error', dataTestsSuccess_clientError)
+            .on('end', dataTestsSuccess_clientEnd);
+
+        //connect
+        dataTestsSuccess_client.connect(dataTestsSuccess_connectionError);
+
+
+        for (id in dataTests_successCommands) {
+            if (dataTests_successCommands.hasOwnProperty(id)) {
+                dataTests_checkRun = true;
+
+                dataTestsSuccess_queryConfig = dataTests_successCommands[id];
+
+                dataTestsSuccess_client.query(dataTestsSuccess_queryConfig)
+                    .on('error', dataTestsSuccess_queryError)
                     .on('row', dataTestsSuccess_queryRow)
                     .on('end', dataTestsSuccess_queryEnd);
             }
@@ -276,9 +389,9 @@ if (program.maintenance) {
     };
 
     //varrables for maintenance_queryEnd
-    var rowcount = 0;
-    var startname = '';
-    var complete = '';
+    var maintenance_rowcount = 0;
+    var maintenance_startname = '';
+    var maintenance_complete = '';
 
     //maintenance query row callback
     var maintenance_queryRow = function (row, result) {
@@ -293,19 +406,19 @@ if (program.maintenance) {
     **/
     var maintenance_queryEnd = function (result) {
         'use strict';
-        if (rowcount === 0) {
+        if (maintenance_rowcount === 0) {
             console.log('');
             console.log("Begining Maintenance.");
         }
         //calculate the percent complete
-        startname = this.name;
-        complete = ((rowcount / maintenance_Obj.length) * 100).toFixed(2);
+        maintenance_startname = this.name;
+        maintenance_complete = ((maintenance_rowcount / maintenance_Obj.length) * 100).toFixed(2);
 
         //messages for showing progress
-        console.log('  Running ' + this.name + ' ' + complete + '% completed');
-        rowcount = rowcount + 1;
+        console.log('  Running ' + this.name + ' ' + maintenance_complete + '% completed');
+        maintenance_rowcount = maintenance_rowcount + 1;
 
-        if (rowcount === maintenance_Obj.length) {
+        if (maintenance_rowcount === maintenance_Obj.length) {
 
             endTime = new Date().getTime()
 
@@ -381,12 +494,14 @@ if (program.buildcache) {
     var buildBuffer_queryConfig;
     var buildBuffer_count;
     var BuildBuffer_ar = [];
+    var buildBuffer_rowcount = 0;
 
-    //varrables for buildCache_queryEnd
-    var rowcount = 0;
-    var startname = '';
-    var dot = '';
-    var complete = '';
+    //varrables for buildCache
+    var buildCache_rowcount = 0;
+    var buildCache_startname = '';
+    var buildCache_dot = '';
+    var buildCache_complete = '';
+
 
     //Cache Count error callback
     var  buildCacheCount_clientError = function (err) {
@@ -469,7 +584,13 @@ if (program.buildcache) {
     var buildBuffer_clientDrain = function () {
         'use strict';
          buildBuffer_client.end();
-         //bufferCheck();
+    };
+
+    //when Buffer query ends
+    var buildBuffer_clientEnd = function (result) {
+        'use strict';
+        console.log('Building Buffers Complete.');
+        //bufferCheck();
     };
 
     /**
@@ -477,36 +598,13 @@ if (program.buildcache) {
     **/
     var buildBuffer_queryRow = function (row, result) {
         'use strict';
-        console.log('row.');
         return row;
     };
 
     //when Buffer query ends
-    var buildBuffer_clientEnd = function (result) {
-        'use strict';
-        console.log('Building Buffers Complete.');
-    }
-
-    //when Buffer query ends
     var buildBuffer_queryEnd = function (result) {
         'use strict';
-        //if (rowcount === 99999) {
-        //  return result;
-        //}
-
-        if (rowcount === 0){
-          console.log(' ');
-          console.log('    Starting: ' + BuildBuffer_ar[rowcount])
-      }
-
-        rowcount = rowcount + 1;
-        console.log('    Completed: ' + this.name);
-        console.log(' ');
-
-        if (rowcount > 0 && rowcount < BuildBuffer_ar.length){
-          console.log('    Starting: ' +BuildBuffer_ar[rowcount])
-        }
-        //return result;
+        buildBuffer_rowcount = on_queryMessages(this, buildBuffer_rowcount, BuildBuffer_ar);
     };
 
     //generic error callback for client,queries
@@ -548,14 +646,14 @@ if (program.buildcache) {
         //open client and connection for Buidling Buffers
         buildBuffer_client = new pg.Client(dataBaseConnectionObject)
             .on('drain', buildBuffer_clientDrain)
-            .on('error',buildBuffer_clientError)
-            .on('end',buildBuffer_clientEnd);
+            .on('error', buildBuffer_clientError)
+            .on('end', buildBuffer_clientEnd);
 
         //connect
         buildBuffer_client.connect(buildBuffer_connectError);
 
         console.log('  Building Buffers...');
-        rowcount = 0;
+        buildBuffer_rowcount = 0;
         buildBuffer_count = buildBuffer_Obj.length;
 
         //build controls - buffers
@@ -566,9 +664,9 @@ if (program.buildcache) {
                 BuildBuffer_ar.push(buildBuffer_queryConfig.name);
 
                 buildBuffer_query = buildBuffer_client.query(buildBuffer_queryConfig)
-                    .on('error',buildBuffer_queryError)
-                    .on('row',buildBuffer_queryRow)
-                    .on('end',buildBuffer_queryEnd);
+                    .on('error', buildBuffer_queryError)
+                    .on('row', buildBuffer_queryRow)
+                    .on('end', buildBuffer_queryEnd);
 
             }
         }
@@ -708,9 +806,9 @@ if (program.buildcache) {
           Capture the first named query for iterating the inserted count
           we will derice the percent complete from this.
         **/
-        if (rowcount === 0) {
-            startname = this.name;
-            rowcount = 1;
+        if (buildCache_rowcount === 0) {
+            buildCache_startname = this.name;
+            buildCache_rowcount = 1;
         }
 
         /**
@@ -718,24 +816,24 @@ if (program.buildcache) {
           this insures that the percent complete is progresses for each
           N inserts into the cache.
         **/
-        if (startname === this.name) {
+        if (buildCache_startname === this.name) {
 
-            if (rowcount > 1) {
-                console.log('  Processing of ' + buildcacheIncrement + ' locations complete. ' + complete + '% completed');
+            if (buildCache_rowcount > 1) {
+                console.log('  Processing of ' + buildcacheIncrement + ' locations complete. ' + buildCache_complete + '% completed');
                 console.log('');
             }
-            rowcount += buildcacheIncrement;
+            buildCache_rowcount += buildcacheIncrement;
 
             //calculate the percent complete
-            complete = ((rowcount / cnt) * 100).toFixed(2);
-            dot = '';
-            if (rowcount < 2) {
+            buildCache_complete = ((buildCache_rowcount / cnt) * 100).toFixed(2);
+            buildCache_dot = '';
+            if (buildCache_rowcount < 2) {
                 console.log('  Processing of first ' + buildcacheIncrement + ' locations.');
             } else {
                 console.log('  Processing of next ' + buildcacheIncrement + ' locations.');
             }
         } else {
-            dot = dot + '.';
+          buildCache_dot = buildCache_dot + '.';
         }
 
         //messages for showing progress
@@ -746,7 +844,7 @@ if (program.buildcache) {
     //build the data cache
     var buildCache = function (cnt) {
         'use strict';
-        rowcount = 0;
+        buildCache_rowcount = 0;
         var i = 0,
             id,
             theDistance,
