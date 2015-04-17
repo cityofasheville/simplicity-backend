@@ -50,7 +50,6 @@ var msToTime = function (duration) {
 
 var on_queryMessages = function (current, rowcount, arr, secarr) {
 
-
     //first pass starting
     if (rowcount === 0) {
         console.log(' ');
@@ -108,17 +107,22 @@ if (program.datatest) {
     var dataTestsResults_ar = [];
     var dataTests_rowcount = 0;
 
-
-    //varrables for dataTests_queryEnd
-    //var dataTests_rowcount = 0;
-    //var dataTests_complete = '';
-    //var dataTests_first = true;
+    var dataTestsSuccess_queryConfig;
 
     //varrables for dataTestsSuccess_queryEnd
+    var dataTestsSucesss_ar = [];
     var dataTestsSuccess_rowcount = 0;
     var dataTestsSuccess_complete = '';
     var dataTestsSuccess_first = true;
 
+    //generic error callback for client,queries
+    var dataTests_connectionError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Connection Error: %s", err);
+        }
+        return err;
+    };
 
     //data test drain callback when all maintenace queries finish
     var dataTests_clientDrain = function () {
@@ -136,21 +140,42 @@ if (program.datatest) {
         return err;
     };
 
+    //when client ends
+    var dataTests_clientEnd = function (result) {
+        'use strict';
+        console.log('Tests Complete.');
+
+        //all tests completed and one of them failed
+        if (!dataTests_check) {
+
+            //something failed
+            console.log('FAILED test(s) for: ' + dataTests_YAML.testname + '.');
+            console.log('Failed a test!  Cache will not be built! Please see the log for details');
+
+            //time
+            endTime = new Date().getTime()
+            var aTime = endTime - startTime;
+            var  timeMessage = msToTime(aTime);
+            console.log('Completd in ' + timeMessage);
+            console.log(' ');
+        }
+
+        //all tests completed and succesfull
+        if (dataTests_check && !dataTests_checkRun) {
+            console.log('PASSED all tests for: ' + dataTests_YAML.testname + '.');
+            dataTestsSuccess();
+        }
+
+        return result;
+    };
+
+
     //generic error callback for client,queries
     var dataTests_queryError = function (err) {
         'use strict';
         if (err) {
             console.error("Query Error: %s", err);
             dataTests_check = false;
-        }
-        return err;
-    };
-
-    //generic error callback for client,queries
-    var dataTests_connectionError = function (err) {
-        'use strict';
-        if (err) {
-            console.error("Connection_Error: %s", err);
         }
         return err;
     };
@@ -182,34 +207,6 @@ if (program.datatest) {
         dataTests_rowcount = on_queryMessages(this, dataTests_rowcount, dataTests_ar, dataTestsResults_ar);
     };
 
-    //when client ends
-    var dataTests_clientEnd = function (result) {
-        'use strict';
-        console.log('Tests Complete.');
-
-        //all tests completed and one of them failed
-        if (!dataTests_check) {
-
-            //something failed
-            console.log('FAILED test(s) for: ' + dataTests_YAML.testname + '.');
-            console.log('Failed a test!  Cache will not be built! Please see the log for details');
-
-            //time
-            endTime = new Date().getTime()
-            var aTime = endTime - startTime;
-            var  timeMessage = msToTime(aTime);
-            console.log('Completd in ' + timeMessage);
-            console.log(' ');
-        }
-
-        //all tests completed and succesfull
-        if (dataTests_check && !dataTests_checkRun) {
-            console.log('PASSED all tests for: ' + dataTests_YAML.testname + '.');
-            dataTestsSuccess();
-        }
-
-        return result;
-    };
 
     //data tests functionå
     var dataTests = function () {
@@ -267,12 +264,20 @@ if (program.datatest) {
         return err;
     };
 
-
     //when client ends
     var dataTestsSuccess_clientEnd = function (result) {
         'use strict';
+
+        endTime = new Date().getTime()
+
+        var aTime = endTime - startTime;
+        var  timeMessage = msToTime(aTime);
+        console.log('Completd Data Test in ' + timeMessage);
+        console.log(' ');
+
         return result;
     };
+
     //data tests successful query row callback
     var dataTestsSuccess_queryRow = function (row, result) {
         'use strict';
@@ -291,35 +296,17 @@ if (program.datatest) {
     //when query ends
     var dataTestsSuccess_queryEnd = function (result) {
         'use strict';
-
-        if (dataTestsSuccess_first) {
-            dataTestsSuccess_first = false;
-            console.log('');
-            console.log('Running Data Push for ' + dataTests_YAML.testname);
-        }
-        //calculate the percent complete
-        dataTestsSuccess_complete = ((dataTestsSuccess_rowcount / dataTests_YAML.onsuccess.length) * 100).toFixed(2);
-
-        //messages for showing progress
-        console.log('  Running ' + this.name + ' ' + dataTestsSuccess_complete + '% completed');
-        dataTestsSuccess_rowcount = dataTestsSuccess_rowcount + 1;
-
-        if (dataTestsSuccess_rowcount === dataTests_YAML.onsuccess.length) {
-            endTime = new Date().getTime()
-
-            var aTime = endTime - startTime;
-            var  timeMessage = msToTime(aTime);
-            console.log('Completd Data test in ' + timeMessage);
-            console.log(' ');
-        }
+        dataTestsSuccess_rowcount = on_queryMessages(this, dataTestsSuccess_rowcount, dataTestsSucesss_ar);
     };
 
     //data tests success full run these queries
     var dataTestsSuccess = function () {
         'use strict';
         var id;
-        var dataTestsSuccess_queryConfig;
         var dataTests_successCommands = dataTests_YAML.onsuccess;
+
+        console.log('');
+        console.log('Running Data Push for ' + dataTests_YAML.testname);
 
         //open client and connection for Buidling Buffers
         dataTestsSuccess_client = new pg.Client(dataBaseConnectionObject)
@@ -336,6 +323,8 @@ if (program.datatest) {
                 dataTests_checkRun = true;
 
                 dataTestsSuccess_queryConfig = dataTests_successCommands[id];
+
+                dataTestsSucesss_ar.push(dataTestsSuccess_queryConfig.name);
 
                 dataTestsSuccess_client.query(dataTestsSuccess_queryConfig)
                     .on('error', dataTestsSuccess_queryError)
@@ -373,8 +362,23 @@ if (program.maintenance) {
     var maintenance_Obj = maintenance_YAML.sql;
     var maintenance_queryConfig;
 
+    //varrables for maintenance_queryEnd
+    var maintenance_rowcount = 0;
+    var maintenance_startname = '';
+    var maintenance_complete = '';
+    var maintenance_ar = [];
+
+    //maintence error callback
+    var maintenance_connectionError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Connection Error: %s", err);
+        }
+        return err;
+    };
+
     //maintence drain callback when all maintenace queries finish
-    var maintenance_drain = function () {
+    var maintenance_clientDrain = function () {
         'use strict';
         maintenance_client.end();
     };
@@ -383,15 +387,33 @@ if (program.maintenance) {
     var maintenance_clientError = function (err) {
         'use strict';
         if (err) {
-            console.error("Error: %s", err);
+            console.error("Client Error: %s", err);
         }
         return err;
     };
 
-    //varrables for maintenance_queryEnd
-    var maintenance_rowcount = 0;
-    var maintenance_startname = '';
-    var maintenance_complete = '';
+    //when client ends
+    var maintenance_clientEnd = function (result) {
+        'use strict';
+        endTime = new Date().getTime()
+
+        var aTime = endTime - startTime;
+        var  timeMessage = msToTime(aTime);
+        console.log('Completed Maintenance in ' + timeMessage + '.');
+        console.log(' ');
+
+        return result;
+    };
+
+    //maintence error callback
+    var maintenance_queryError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Query Error: %s", err);
+        }
+        return err;
+    };
+
 
     //maintenance query row callback
     var maintenance_queryRow = function (row, result) {
@@ -406,27 +428,9 @@ if (program.maintenance) {
     **/
     var maintenance_queryEnd = function (result) {
         'use strict';
-        if (maintenance_rowcount === 0) {
-            console.log('');
-            console.log("Begining Maintenance.");
-        }
-        //calculate the percent complete
-        maintenance_startname = this.name;
-        maintenance_complete = ((maintenance_rowcount / maintenance_Obj.length) * 100).toFixed(2);
 
-        //messages for showing progress
-        console.log('  Running ' + this.name + ' ' + maintenance_complete + '% completed');
-        maintenance_rowcount = maintenance_rowcount + 1;
+        maintenance_rowcount = on_queryMessages(this, maintenance_rowcount, maintenance_ar);
 
-        if (maintenance_rowcount === maintenance_Obj.length) {
-
-            endTime = new Date().getTime()
-
-            var aTime = endTime - startTime;
-            var  timeMessage = msToTime(aTime);
-            console.log('Completed Maintenance in ' + timeMessage + '.');
-            console.log(' ');
-        }
     };
 
     /*
@@ -434,18 +438,29 @@ if (program.maintenance) {
     */
     var maintenance = function () {
         'use strict';
-
-        //open client and connection for maintenance
-        maintenance_client = new pg.Client(dataBaseConnectionObject);
-        maintenance_client.on('drain', maintenance_drain);
-        maintenance_client.connect(maintenance_clientError);
-
         var id;
+
+        console.log(' ');
+        console.log('Running Maintenance ');
+
+        //open client and connection for Buidling Buffers
+        maintenance_client = new pg.Client(dataBaseConnectionObject)
+            .on('drain', maintenance_clientDrain)
+            .on('error', maintenance_clientError)
+            .on('end', maintenance_clientEnd);
+
+        //connect
+        maintenance_client.connect(maintenance_connectionError);
 
         for (id in maintenance_Obj) {
             if (maintenance_Obj.hasOwnProperty(id)) {
+
                 maintenance_queryConfig = maintenance_Obj[id];
-                maintenance_client.query(maintenance_queryConfig, maintenance_clientError)
+
+                maintenance_ar.push(maintenance_queryConfig.name);
+
+                maintenance_client.query(maintenance_queryConfig)
+                    .on('error', maintenance_queryError)
                     .on('row', maintenance_queryRow)
                     .on('end', maintenance_queryEnd);
             }
