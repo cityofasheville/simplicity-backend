@@ -104,14 +104,14 @@ if (program.datatest) {
     var dataTests_checkRun = false;
     var dataTests_count;
 
-    var dataTests_ar = [];
-    var dataTests_resultsAr = [];
+    var dataTests_array = [];
+    var dataTests_resultsArray = [];
     var dataTests_rowcount = 0;
 
     var dataTestsSuccess_queryConfig;
 
     //varrables for dataTestsSuccess
-    var dataTestsSucesss_ar = [];
+    var dataTestsSucesss_array = [];
     var dataTestsSuccess_rowcount = 0;
 
     //generic error callback for client,queries
@@ -190,9 +190,9 @@ if (program.datatest) {
         'use strict';
         if (row.hasOwnProperty('check')) {
             if (row.check) {
-                dataTests_resultsAr.push('PASSED');
+                dataTests_resultsArray.push('PASSED');
             } else {
-                dataTests_resultsAr.push('FAILED');
+                dataTests_resultsArray.push('FAILED');
                 dataTests_check = false;
             }
         } else {
@@ -203,7 +203,7 @@ if (program.datatest) {
     //when query ends
     var dataTests_queryEnd = function (result) {
         'use strict';
-        dataTests_rowcount = on_queryMessages(this, dataTests_rowcount, dataTests_ar, dataTests_resultsAr);
+        dataTests_rowcount = on_queryMessages(this, dataTests_rowcount, dataTests_array, dataTests_resultsArray);
     };
 
 
@@ -229,7 +229,7 @@ if (program.datatest) {
 
                 dataTests_queryConfig = dataTests_Obj[id];
 
-                dataTests_ar.push(dataTests_queryConfig.name);
+                dataTests_array.push(dataTests_queryConfig.name);
 
                 dataTests_client.query(dataTests_queryConfig)
                     .on('error', dataTests_queryError)
@@ -295,7 +295,7 @@ if (program.datatest) {
     //when query ends
     var dataTestsSuccess_queryEnd = function (result) {
         'use strict';
-        dataTestsSuccess_rowcount = on_queryMessages(this, dataTestsSuccess_rowcount, dataTestsSucesss_ar);
+        dataTestsSuccess_rowcount = on_queryMessages(this, dataTestsSuccess_rowcount, dataTestsSucesss_array);
     };
 
     //data tests success full run these queries
@@ -323,7 +323,7 @@ if (program.datatest) {
 
                 dataTestsSuccess_queryConfig = dataTests_successCommands[id];
 
-                dataTestsSucesss_ar.push(dataTestsSuccess_queryConfig.name);
+                dataTestsSucesss_array.push(dataTestsSuccess_queryConfig.name);
 
                 dataTestsSuccess_client.query(dataTestsSuccess_queryConfig)
                     .on('error', dataTestsSuccess_queryError)
@@ -363,7 +363,7 @@ if (program.maintenance) {
 
     //varrables for maintenance_queryEnd
     var maintenance_rowcount = 0;
-    var maintenance_ar = [];
+    var maintenance_array = [];
 
     //maintence error callback
     var maintenance_connectionError = function (err) {
@@ -426,7 +426,7 @@ if (program.maintenance) {
     var maintenance_queryEnd = function (result) {
         'use strict';
 
-        maintenance_rowcount = on_queryMessages(this, maintenance_rowcount, maintenance_ar);
+        maintenance_rowcount = on_queryMessages(this, maintenance_rowcount, maintenance_array);
 
     };
 
@@ -454,7 +454,7 @@ if (program.maintenance) {
 
                 maintenance_queryConfig = maintenance_Obj[id];
 
-                maintenance_ar.push(maintenance_queryConfig.name);
+                maintenance_array.push(maintenance_queryConfig.name);
 
                 maintenance_client.query(maintenance_queryConfig)
                     .on('error', maintenance_queryError)
@@ -505,7 +505,7 @@ if (program.buildcache) {
     var buildcacheCheckPass = true;
     var buildBuffer_queryConfig;
     var buildBuffer_count;
-    var BuildBuffer_ar = [];
+    var BuildBuffer_array = [];
     var buildBuffer_rowcount = 0;
 
     //varrables for buildCache
@@ -616,7 +616,7 @@ if (program.buildcache) {
     //when Buffer query ends
     var buildBuffer_queryEnd = function (result) {
         'use strict';
-        buildBuffer_rowcount = on_queryMessages(this, buildBuffer_rowcount, BuildBuffer_ar);
+        buildBuffer_rowcount = on_queryMessages(this, buildBuffer_rowcount, BuildBuffer_array);
     };
 
     //generic error callback for client,queries
@@ -673,7 +673,7 @@ if (program.buildcache) {
             if (buildBuffer_Obj.hasOwnProperty(id)) {
                 buildBuffer_queryConfig = buildBuffer_Obj[id];
 
-                BuildBuffer_ar.push(buildBuffer_queryConfig.name);
+                BuildBuffer_array.push(buildBuffer_queryConfig.name);
 
                 buildBuffer_query = buildBuffer_client.query(buildBuffer_queryConfig)
                     .on('error', buildBuffer_queryError)
