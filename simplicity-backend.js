@@ -103,17 +103,16 @@ if (program.datatest) {
     var dataTests_check = true;
     var dataTests_checkRun = false;
     var dataTests_count;
+
     var dataTests_ar = [];
-    var dataTestsResults_ar = [];
+    var dataTests_resultsAr = [];
     var dataTests_rowcount = 0;
 
     var dataTestsSuccess_queryConfig;
 
-    //varrables for dataTestsSuccess_queryEnd
+    //varrables for dataTestsSuccess
     var dataTestsSucesss_ar = [];
     var dataTestsSuccess_rowcount = 0;
-    var dataTestsSuccess_complete = '';
-    var dataTestsSuccess_first = true;
 
     //generic error callback for client,queries
     var dataTests_connectionError = function (err) {
@@ -191,9 +190,9 @@ if (program.datatest) {
         'use strict';
         if (row.hasOwnProperty('check')) {
             if (row.check) {
-                dataTestsResults_ar.push('PASSED');
+                dataTests_resultsAr.push('PASSED');
             } else {
-                dataTestsResults_ar.push('FAILED');
+                dataTests_resultsAr.push('FAILED');
                 dataTests_check = false;
             }
         } else {
@@ -204,7 +203,7 @@ if (program.datatest) {
     //when query ends
     var dataTests_queryEnd = function (result) {
         'use strict';
-        dataTests_rowcount = on_queryMessages(this, dataTests_rowcount, dataTests_ar, dataTestsResults_ar);
+        dataTests_rowcount = on_queryMessages(this, dataTests_rowcount, dataTests_ar, dataTests_resultsAr);
     };
 
 
@@ -223,7 +222,7 @@ if (program.datatest) {
         dataTests_client.connect(dataTests_connectionError);
 
         console.log(' ');
-        console.log('Running Test ' + dataTests_YAML.testname);
+        console.log('Running Test(s) for  ' + dataTests_YAML.testname);
 
         for (id in dataTests_Obj) {
             if (dataTests_Obj.hasOwnProperty(id)) {
@@ -364,8 +363,6 @@ if (program.maintenance) {
 
     //varrables for maintenance_queryEnd
     var maintenance_rowcount = 0;
-    var maintenance_startname = '';
-    var maintenance_complete = '';
     var maintenance_ar = [];
 
     //maintence error callback
