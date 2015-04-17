@@ -371,12 +371,16 @@ if (program.buildcache) {
     var bufferCheck_client;
     var buildBuffer_client;
     var buildCache_client;
+    var buildBuffer_query;
 
     //controling variables
     var buildcacheIncrement = buildcache_YAML.increment;
     var buildcacheSleep = buildcache_YAML.sleep;
     var buildcacheDistances;
     var buildcacheCheckPass = true;
+    var buildBuffer_queryConfig;
+    var buildBuffer_count;
+    var BuildBuffer_ar = [];
 
     //varrables for buildCache_queryEnd
     var rowcount = 0;
@@ -453,6 +457,146 @@ if (program.buildcache) {
 
     };
 
+    var buildBuffer_end = function () {
+        'use strict';
+        console.log(' ');
+        console.log('Completd Buidling of Buffers');
+
+        //rowcount = 99999;
+        //BuildBuffer_ar = [];
+        buildBuffer_client.end();
+        //bufferCheck();
+    }
+
+    //Build Buffer error callback
+    var buildBuffer_clientError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Error: %s", err);
+        }
+        return err;
+    };
+
+    var buildBuffer_queryDrain = function () {
+        'use strict';
+         console.log('Query Drain.');
+    };
+
+    var buildBuffer_clientDrain = function () {
+        'use strict';
+         buildBuffer_client.end();
+         //buildBuffer_end();
+    };
+
+    /**
+      Build Buffer query on row method.
+    **/
+    var buildBuffer_queryRow = function (row, result) {
+        'use strict';
+        console.log('row.');
+        return row;
+    };
+
+    //when Buffer query ends
+    var buildBuffer_clientEnd = function (result) {
+        'use strict';
+        console.log('Building Buffers Complete.');
+    }
+
+    //when Buffer query ends
+    var buildBuffer_queryEnd = function (result) {
+        'use strict';
+        //console.log('Query End.');
+        //console.log('    Build: ' + this.name);
+        //console.log('Query End.');
+
+
+        //if (rowcount === 99999) {
+        //  return result;
+        //}
+
+        if (rowcount === 0){
+          console.log(' ');
+          console.log('    Starting: ' + BuildBuffer_ar[rowcount])
+      }
+
+        rowcount = rowcount + 1;
+        console.log('    Completed: ' + this.name);
+        //console.log(' ');
+
+        if (rowcount > 0 && rowcount < BuildBuffer_ar.length-1){
+          console.log(' ');
+          console.log('    Starting: ' +BuildBuffer_ar[rowcount])
+        }
+        //return result;
+    };
+
+    //generic error callback for client,queries
+    var buildBuffer_clientError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Client Error: %s", err);
+        }
+        return err;
+    };
+
+    //generic error callback for client,queries
+    var buildBuffer_queryError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Query Error: %s", err);
+        }
+        return err;
+    };
+
+    //generic error callback for client,queries
+    var buildBuffer_connectError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Connection Error: %s", err);
+        }
+        return err;
+    };
+
+    /*
+      build the buffer layer
+      the buffer layer is used to find all the topics near a location or
+      address.
+    */
+    var buildBuffer = function () {
+        'use strict';
+        var id;
+
+        //open client and connection for Buidling Buffers
+        buildBuffer_client = new pg.Client(dataBaseConnectionObject)
+            .on('drain', buildBuffer_clientDrain)
+            .on('error',buildBuffer_clientError)
+            .on('end',buildBuffer_clientEnd);
+
+        //connect
+        buildBuffer_client.connect(buildBuffer_connectError);
+
+        console.log('  Building Buffers...');
+        rowcount = 0;
+        buildBuffer_count = buildBuffer_Obj.length;
+
+        //build controls - buffers
+        for (id in buildBuffer_Obj) {
+            if (buildBuffer_Obj.hasOwnProperty(id)) {
+                buildBuffer_queryConfig = buildBuffer_Obj[id];
+
+                BuildBuffer_ar.push(buildBuffer_queryConfig.name);
+
+                buildBuffer_query = buildBuffer_client.query(buildBuffer_queryConfig)
+                    .on('error',buildBuffer_queryError)
+                    .on('row',buildBuffer_queryRow)
+                    .on('end',buildBuffer_queryEnd);
+
+            }
+        }
+
+    };
+
     //Buffer check error callback
     var bufferCheck_clientError = function (err) {
         'use strict';
@@ -516,7 +660,6 @@ if (program.buildcache) {
     */
     var bufferCheck = function () {
         'use strict';
-        console.log('Buidling Buffers Complete.');
         console.log('');
         console.log('Testing Buffer Data.');
 
@@ -532,76 +675,10 @@ if (program.buildcache) {
             if (buildCheck_Obj.hasOwnProperty(id)) {
 
                 //send the sql statements to check the buffers
+
                 bufferCheck_client.query(buildCheck_Obj[id], bufferCheck_clientError)
                     .on('row', bufferCheck_queryRow)
                     .on('end', bufferCheck_queryEnd);
-            }
-        }
-    };
-
-    //Build Buffer error callback
-    var buildBuffer_clientError = function (err) {
-        'use strict';
-        if (err) {
-            console.error("Error: %s", err);
-        }
-        return err;
-    };
-
-    var buildBuffer_drain = function () {
-        'use strict';
-        buildBuffer_client.end();
-        bufferCheck();
-    };
-
-    /**
-      Build Buffer query on row method.
-    **/
-    var buildBuffer_queryRow = function (row, result) {
-        'use strict';
-        console.log('    Step:' + this.name);
-        //return row;
-    };
-
-
-    //when Buffer query ends
-    var buildBuffer_queryEnd = function (result) {
-        'use strict';
-        console.log('    ' + this.name);
-        //return result;
-    };
-
-    //generic error callback for client,queries
-    var buildBuffer_clientError = function (err) {
-        'use strict';
-        if (err) {
-            console.error("Error: %s", err);
-        }
-        return err;
-    };
-
-    /*
-      build the buffer layer
-      the buffer layer is used to find all the topics near a location or
-      address.
-    */
-    var buildBuffer = function () {
-        'use strict';
-        var id;
-
-        //open client and connection for Buidling Buffers
-        buildBuffer_client = new pg.Client(dataBaseConnectionObject);
-        buildBuffer_client.on('drain', buildBuffer_drain);
-        buildBuffer_client.connect(buildBuffer_clientError);
-
-        console.log('  Building Buffers...');
-        rowcount = 0;
-        //build controls - buffers
-        for (id in buildBuffer_Obj) {
-            if (buildBuffer_Obj.hasOwnProperty(id)) {
-                buildBuffer_client.query(buildBuffer_Obj[id], buildBuffer_clientError)
-                    .on('row', buildBuffer_queryRow)
-                    .on('end', buildBuffer_queryEnd);
             }
         }
     };

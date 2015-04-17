@@ -5,8 +5,8 @@ count:
   text: SELECT count(*) as count FROM gisowner.coa_opendata_address_hold;
   values:
 buffer:
-- name: count
-  text: SELECT *  FROM gisowner.coa_opendata_address_hold;
+- name: ReIndex Zoning Overlays Shapes
+  text: REINDEX INDEX gisowner.coa_opendata_zoning_overlays_hold_shape;
   values:
 - name: Create View
   text: CREATE OR REPLACE VIEW gisowner.coa_address_buffers_view_hold AS SELECT st_transform(ST_Buffer(st_transform(shape, 2264),1320),4326)::geometry shape, 1320::numeric(10,4) as distance, objectid, civicaddress_id FROM gisowner.coa_opendata_address_hold UNION SELECT st_transform(ST_Buffer(st_transform(shape, 2264),660),4326)::geometry shape, 660::numeric(10,4) as distance, objectid, civicaddress_id FROM gisowner.coa_opendata_address_hold  UNION SELECT st_transform(ST_Buffer(st_transform(shape, 2264),330),4326)::geometry shape, 330::numeric(10,4) as distance, objectid, civicaddress_id FROM gisowner.coa_opendata_address_hold  UNION SELECT st_transform(ST_Buffer(st_transform(shape, 2264),165),4326)::geometry shape, 165::numeric(10,4) as distance, objectid, civicaddress_id FROM gisowner.coa_opendata_address_hold  UNION SELECT st_transform(ST_Buffer(st_transform(shape, 2264),82.5),4326)::geometry shape, 82.5::numeric(10,4) as distance, objectid, civicaddress_id FROM gisowner.coa_opendata_address_hold;
@@ -16,48 +16,6 @@ buffer:
   values:
 - name: create buffers
   text: INSERT INTO gisowner.coa_address_buffers_cache_hold (SELECT (row_number() OVER (ORDER BY (SHAPE)))::integer as objectid, distance, civicaddress_id, shape FROM gisowner.coa_address_buffers_view_hold ORDER BY distance DESC);
-  values:
-- name: vacuum buffers
-  text: VACUUM ANALYZE gisowner.coa_address_buffers_cache_hold
-  values:
-- name: reindex buffers
-  text: REINDEX TABLE gisowner.coa_address_buffers_cache_hold;
-  values:
-- name: clear cache
-  text: TRUNCATE TABLE gisowner.coa_overlay_data_cache_hold;
-  values:
-- name: Resequence Cache HOLD
-  text: ALTER SEQUENCE gisowner.coa_overlay_data_cache_hold_objectid_seq RESTART WITH 1;;
-  values:
-- name: ReIndex Buffer Shapes
-  text: REINDEX INDEX gisowner.coa_address_buffers_cache_hold_shape;
-  values:
-- name: ReIndex Neighborhood Shapes
-  text: REINDEX INDEX gisowner.coa_opendata_asheville_neighborhoods_hold_shape;
-  values:
-- name: ReIndex City Limits Shapes
-  text: REINDEX INDEX gisowner.coa_opendata_city_limits_hold_shape;
-  values:
-- name: ReIndex Crime Shapes
-  text: REINDEX INDEX gisowner.coa_opendata_crime_hold_shape;
-  values:
-- name: ReIndex Permit Shapes
-  text: REINDEX INDEX gisowner.coa_opendata_permits_hold_shape;
-  values:
-- name: ReIndex Property Shapes
-  text: REINDEX INDEX gisowner.coa_opendata_property_hold_shape;
-  values:
-- name: ReIndex Sanitation Shapes
-  text: REINDEX INDEX gisowner.coa_opendata_sanitation_districts_hold_shape;
-  values:
-- name: ReIndex Sanitation Shapes
-  text: REINDEX INDEX gisowner.coa_opendata_streets_hold_shape;
-  values:
-- name: ReIndex Zoning Shapes
-  text: REINDEX INDEX gisowner.coa_opendata_zoning_hold_shape;
-  values:
-- name: ReIndex Zoning Overlays Shapes
-  text: REINDEX INDEX gisowner.coa_opendata_zoning_overlays_hold_shape;
   values:
 - name: vaucum cache
   text: VACUUM ANALYZE gisowner.coa_overlay_data_cache_hold;
