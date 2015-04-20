@@ -37,6 +37,8 @@ Usage: simplicity-backend [options]
 ##Setup
 
 ###database connection
+[Datbase Base Configuration](database_configuration.md)
+
 ```sh
 $ cp db_sample.yml config/db.yml
 ```
