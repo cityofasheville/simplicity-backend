@@ -141,12 +141,9 @@ $ cp buildcache_sample.yml config/buildcache.yml
 
 edit `config/buildcache.yml` and update with your settings.
 
-###*Rule:*  
-* The Count SQL statement must have one field that returns a integer named exactly "count".
-* The Count SQL statement must return a number greater than 1.
 *Assumes there is a view that takes care of buffers with all the distances already*
 
-In this sample 2264 is the projection of NC State Plane.  Adjust the the Projection code to match your projections code.
+In this sample 2264 is the projection of NC State Plane.  Adjust the the Projection code to match your projection code.
 
 #####Sample view DDL
 ```sql
@@ -190,7 +187,13 @@ CREATE OR REPLACE VIEW postgres.locations_view_hold  AS
 #####Example Build Cache Configuration
 count - counts the number of locations or addresses in the location table
 
-increment - number of locationids to process at a time.  With limited testing I have seen 100 to give great results
+####*Buffer Count Rules:*  
+* The SQL statement must have two fields.
+  * One that returns a boolean named exactly "check"..
+  * One that reuturns an integer named exaclty "count".
+* The SQL statement must return one row.
+
+increment - number of locationids to process at a time.  With limited testing an increment of 100 to seems to have results
 
 sleep - in some cases depending on server resources I have seen the process time actually improve by increaseing this. around 1 - 3 seconds seems to work best.  the number is milliseconds. So 1 second is 1000.
 
@@ -209,7 +212,7 @@ increment: 100
 sleep: 0
 count:
 - name: count
-  text: SELECT count(*) as count FROM postgres.locations_table1_hold;
+  text: SELECT count(*) > $1 as check, count(*)  as count FROM postgres.locations_table1_hold;
   values:
 control:
 - name: truncate buffers
@@ -270,29 +273,101 @@ $ node simplicity-backend.js -d config/db.yml -c config/buildcache.yml
 ####returns:
 
 ```
-total address count: 148412
-Building Buffers...
-check buffers PASSED.
-count distances PASSED.
-PASSED All Tests, building Cache!
-Processing next 100 locations, 0.07% completed
-  Crime...400 row(s) returned.  
-  Permits...400 row(s) returned.  
-  Address In City...93 row(s) returned.  
-  Zoning...93 row(s) returned.  
-  Zoning Overlays...93 row(s) returned.  
-  Trash Day...93 row(s) returned.  
-  Recycle Day...93 row(s) returned.  
-  Remove Blanks...1163 row(s) returned.  
-Processing next 100 locations, 0.14% completed
-  Crime...400 row(s) returned.  
-  Permits...400 row(s) returned.  
-  Address In City...98 row(s) returned.  
-  Zoning...98 row(s) returned.  
-  Zoning Overlays...98 row(s) returned.  
-  Trash Day...98 row(s) returned.  
-  Recycle Day...98 row(s) returned.  
-  Remove Blanks...1192 row(s) returned.
+Starting Building Data Cache.
+
+  Testing addresses.
+
+    Starting: Count Address
+    Completed: Count Address
+    PASSED
+
+    PASSED all tests for: Count Address.
+
+  Testing addresses Complete.
+  Building Buffers...
+
+    Starting: ReIndex Zoning Overlays Shapes
+    Completed: ReIndex Zoning Overlays Shapes
+
+    Starting: Create View
+    Completed: Create View
+
+    Starting: truncate buffers
+    Completed: truncate buffers
+
+    Starting: create buffers
+    Completed: create buffers
+
+    Starting: vacuum buffers
+    Completed: vacuum buffers
+
+    Starting: vaucum cache
+    Completed: vaucum cache
+
+  Building Buffers Complete.
+  Testing Buffer Data.
+
+    Starting: check buffers
+    Completed: check buffers
+    PASSED
+
+    Starting: count distances
+    Completed: count distances
+    PASSED
+
+    PASSED all tests for: vaucum cache.
+
+  Testing Buffers Complete.
+  Building Cache...
+
+      Batch Processing First 100 Locations....
+
+    Starting: Crime
+    Completed: Crime
+    Processed: 400 row(s) in Crime.
+
+
+    Starting: Permits
+    Completed: Permits
+    Processed: 400 row(s) in Permits.
+
+
+    Starting: Address In City
+    Completed: Address In City
+    Processed: 93 row(s) in Address In City.
+
+
+    Starting: Zoning
+    Completed: Zoning
+    Processed: 93 row(s) in Zoning.
+
+
+    Starting: Zoning Overlays
+    Completed: Zoning Overlays
+    Processed: 93 row(s) in Zoning Overlays.
+
+
+    Starting: Trash Day
+    Completed: Trash Day
+    Processed: 93 row(s) in Trash Day.
+
+
+    Starting: Recycle Day
+    Completed: Recycle Day
+    Processed: 93 row(s) in Recycle Day.
+
+
+    Starting: Remove Blanks
+    Completed: Remove Blanks
+    Processed: 1961 row(s) in Remove Blanks.
+
+
+    Starting: Crime
+    Completed: Crime
+    Processed: 400 row(s) in Crime.
+
+      Finished Batch Processing 100 Locations.
+      Batch Processing Next 100 Locations.
 ```
 
 ##Software

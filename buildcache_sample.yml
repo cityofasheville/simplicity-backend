@@ -2,9 +2,9 @@ increment: 100
 sleep: 0
 count:
 - name: count
-  text: SELECT count(*) as count FROM postgres.locations_table1_hold;
+  text: SELECT count(*) > $1 as check, count(*)  as count FROM postgres.locations_table1_hold;
   values:
-control:
+buffer:
 - name: truncate buffers
   text: TRUNCATE table postgres.locations_buffers_cache_hold;
   values:
