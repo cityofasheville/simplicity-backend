@@ -37,59 +37,10 @@ Usage: simplicity-backend [options]
 ##Setup
 
 ###database connection
-[Datbase Base Configuration](database_configuration.md)
-
-```sh
-$ cp db_sample.yml config/db.yml
-```
-**Warning:** naming this file anything but db.yml will push the database configuration including the password to github on a git push.
-
-edit `config/db.yml` and update with your settings.
-
-```sh
-$ cp datatests_sample.yml config/db.yml
-```
-
-#####example database configuration
-of course change to match your postgres settings.
-```yaml
-host: 192.162.0.1
-database: postgres
-user: postgres
-password: postgres
-```
+[Database Base Configuration](database_configuration.md)
 
 ####maintenance configuration
-```sh
-$ cp maintenance-sample.yml config/maintenance.yml
-```
-
-edit `config/maintenance.yml` and update with your settings.
-
-#####example maintenance configuration
-```yaml
-sql:
-- name: reindex postgres.table1
-  text: REINDEX TABLE postgres.table1;
-  values:
-- name: VACUUM postgres.table1
-  text: VACUUM ANALYZE postgres.table1;
-  values:
-```
-
-####running:
-
-```sh
-$ node simplicity-backend.js -d config/db.yml -t config/datatests.yml
-```
-
-####returns:
-
-```
-count table1 FAILED.
-type table1 PASSED.
-table1 tests Test Result: false
-```
+[Maintenance Configuration](maintenance_configuration.md)
 
 ####Data Tests Configuration
 ```sh
