@@ -1,9 +1,9 @@
 increment: 100
 sleep: 0
 count:
-- name: count
-  text: SELECT count(*) as count FROM gisowner.coa_opendata_address_hold;
-  values:
+- name: Count Address
+  text: SELECT count(*) > $1 as check, count(*)  as count FROM gisowner.coa_opendata_address_hold;
+  values: [10000]
 buffer:
 - name: ReIndex Zoning Overlays Shapes
   text: REINDEX INDEX gisowner.coa_opendata_zoning_overlays_hold_shape;
@@ -16,6 +16,9 @@ buffer:
   values:
 - name: create buffers
   text: INSERT INTO gisowner.coa_address_buffers_cache_hold (SELECT (row_number() OVER (ORDER BY (SHAPE)))::integer as objectid, distance, civicaddress_id, shape FROM gisowner.coa_address_buffers_view_hold ORDER BY distance DESC);
+  values:
+- name: vacuum buffers
+  text: VACUUM ANALYZE gisowner.coa_address_buffers_cache_hold
   values:
 - name: vaucum cache
   text: VACUUM ANALYZE gisowner.coa_overlay_data_cache_hold;

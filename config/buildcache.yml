@@ -1,9 +1,9 @@
 increment: 100
 sleep: 0
 count:
-- name: count
-  text: SELECT count(*) as count FROM gisowner.coa_opendata_address_hold;
-  values:
+- name: Count Address
+  text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_address_hold;
+  values: [10000]
 buffer:
 - name: count
   text: SELECT *  FROM gisowner.coa_opendata_address_hold;
