@@ -63,7 +63,6 @@ var on_queryMessages = function (current, rowcount, arr, secarr) {
     }
     console.log(' ');
 
-
     rowcount = rowcount + 1;
     //if not last call add starting of next one
     if (rowcount > 0 && rowcount < arr.length) {
@@ -917,20 +916,10 @@ if (program.buildcache) {
         return err;
     };
 
-    // var buildCache_end = function () {
-    //     'use strict';
-    //     endTime = new Date().getTime();
-    //     var aTime = endTime - startTime;
-    //     sleep(1000);
-    //     var  timeMessage = msToTime(aTime);
-    //     console.log('completed Build of Cache in ' + timeMessage);
-    // };
-
     //when all cache buidling queroes end kill the client connection
     var buildCache_clientDrain = function () {
         'use strict';
         buildCache_client.end();
-        //buildCache_end();
         return;
     };
 
@@ -1003,11 +992,11 @@ if (program.buildcache) {
         if (buildCache_startname === this.name) {
             if (buildCache_rowcount > 1) {
                 buildcacheIncrement_Count += buildcacheIncrement;
-                end_process_batch_message   = '\n      Finished batch Processing ' + buildcacheIncrement + ' locations.\n';
+                end_process_batch_message   = '\n      Finished Batch Processing ' + buildcacheIncrement + ' Locations.';
             }
 
             if (buildCache_rowcount > 2) {
-                start_proccess_batch_message  = '\n      Processing Next ' + buildcacheIncrement + ' locations.\n';
+                start_proccess_batch_message  = '\n      Batch Processing Next ' + buildcacheIncrement + ' Locations.';
             }
         }
 
@@ -1029,7 +1018,7 @@ if (program.buildcache) {
 
           console.log('  Building Cache...');
           console.log(' ');
-          console.log('      Batch Processing First 100 Locations....');
+          console.log('      Batch Processing First 100 Locations');
 
           //open client and connection for Buidling Buffers
           buildCache_client = new pg.Client(dataBaseConnectionObject)
