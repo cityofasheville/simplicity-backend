@@ -525,11 +525,15 @@ if (program.buildcache) {
     var buildCacheCheck_checkRun = false;
 
 
-    //varrables for buildCache
+    //varriables for buildCacheBuffer
+    var buildCache_queryConfig;
     var buildCache_array = [];
+    var buildCache_resultsArray = [];
     var buildCache_rowcount = 0;
+    var buildcacheIncrement_Count = 0;
+
+    //varrables for buildCache
     var buildCache_startname = '';
-    var buildCache_dot = '';
     var buildCache_complete = '';
 
     var buildCache_locationCount = 0;
@@ -723,7 +727,7 @@ if (program.buildcache) {
     };
 
     //generic error callback for client,queries
-    var buildCacheBuffer_connectError = function (err) {
+    var buildCacheBuffer_connectionError = function (err) {
         'use strict';
         if (err) {
             console.error("Connection Error: %s", err);
@@ -749,7 +753,7 @@ if (program.buildcache) {
             .on('end', buildCacheBuffer_clientEnd);
 
         //connect
-        buildCacheBuffer_client.connect(buildCacheBuffer_connectError);
+        buildCacheBuffer_client.connect(buildCacheBuffer_connectionError);
 
         //build controls - buffers
         for (id in buildCacheBuffer_Obj) {
@@ -770,7 +774,7 @@ if (program.buildcache) {
     };
 
     //Buffer check error callback
-    var buildCacheCheck_connectError = function (err) {
+    var buildCacheCheck_connectionError = function (err) {
         'use strict';
         if (err) {
             console.error("Connection Error: %s", err);
@@ -816,10 +820,10 @@ if (program.buildcache) {
 
         //all tests completed and succesfull
         if (buildCacheCheck_check && !buildCacheCheck_checkRun) {
-            console.log('  PASSED all tests for: ' + buildCacheBuffer_queryConfig.name + '.');
+            console.log('    PASSED all tests for: ' + buildCacheBuffer_queryConfig.name + '.');
             console.log('');
             console.log('  Testing Buffers Complete.');
-             //buildCache();
+            buildCache();
         }
 
         return result;
@@ -883,7 +887,7 @@ if (program.buildcache) {
             .on('end', buildCacheCheck_clientEnd);
 
         //connect
-        buildCacheCheck_client.connect(buildCacheCheck_connectError);
+        buildCacheCheck_client.connect(buildCacheCheck_connectionError);
 
         //check the buffers
         for (id in buildCacheCheck_Obj) {
@@ -905,29 +909,62 @@ if (program.buildcache) {
 
 
     //generic error callback for client,queries
-    var buildCache_clientError = function (err) {
+    var buildCache_connectionError = function (err) {
         'use strict';
         if (err) {
-            console.error("Error: %s", err);
+            console.error("Connection Error: %s", err);
         }
         return err;
     };
 
-    var buildCache_end = function () {
-        'use strict';
-        endTime = new Date().getTime();
-        var aTime = endTime - startTime;
-        sleep(1000);
-        var  timeMessage = msToTime(aTime);
-        console.log('completed Build of Cache in ' + timeMessage);
-    };
+    // var buildCache_end = function () {
+    //     'use strict';
+    //     endTime = new Date().getTime();
+    //     var aTime = endTime - startTime;
+    //     sleep(1000);
+    //     var  timeMessage = msToTime(aTime);
+    //     console.log('completed Build of Cache in ' + timeMessage);
+    // };
 
     //when all cache buidling queroes end kill the client connection
-    var buildCache_Drain = function () {
+    var buildCache_clientDrain = function () {
         'use strict';
         buildCache_client.end();
-        buildCache_end();
+        //buildCache_end();
         return;
+    };
+
+    //generic error callback for client,queries
+    var buildCache_clientError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Client Error: %s", err);
+        }
+        return err;
+    };
+
+    //when client ends
+    var buildCache_clientEnd = function (result) {
+        'use strict';
+        endTime = new Date().getTime();
+
+        var aTime = endTime - startTime;
+        var  timeMessage = msToTime(aTime);
+        console.log('  Completed Building Cache');
+        console.log(' ');
+        console.log('Completed Cache in ' + timeMessage + '.');
+        console.log(' ');
+
+        return result;
+    };
+
+    //generic error callback for client,queries
+    var buildCache_queryError = function (err) {
+        'use strict';
+        if (err) {
+            console.error("Query Error: %s", err);
+        }
+        return err;
     };
 
     //build cache query row callback
@@ -943,6 +980,12 @@ if (program.buildcache) {
     **/
     var buildCache_queryEnd = function (result) {
         'use strict';
+        var start_proccess_batch_message = '';
+        var end_process_batch_message = '';
+        var end_process_layer_message = '';
+        var complete_message = '';
+
+        buildCache_complete = ((buildCache_rowcount / buildCache_locationCount) * 100).toFixed(2);
 
         //small stall to increase performance on inserts.
         sleep(buildcacheSleep);
@@ -953,53 +996,49 @@ if (program.buildcache) {
         **/
         if (buildCache_rowcount === 0) {
             buildCache_startname = this.name;
-            buildCache_rowcount = 1;
         }
 
-        /**
-          iterate the count when we return the first query
-          this insures that the percent complete is progresses for each
-          N inserts into the cache.
-        **/
+        end_process_layer_message =  'Processed: ' + result.rowCount + ' row(s) in '  + this.name + '.\n';
+
         if (buildCache_startname === this.name) {
-
             if (buildCache_rowcount > 1) {
-                console.log('  Processing of ' + buildcacheIncrement + ' locations complete. ' + buildCache_complete + '% completed');
-                console.log('');
+                buildcacheIncrement_Count += buildcacheIncrement;
+                end_process_batch_message   = '\n      Finished batch Processing ' + buildcacheIncrement + ' locations.\n';
             }
-            buildCache_rowcount += buildcacheIncrement;
 
-            //calculate the percent complete
-            buildCache_complete = ((buildCache_rowcount / buildCache_locationCount) * 100).toFixed(2);
-            buildCache_dot = '';
-            if (buildCache_rowcount < 2) {
-                console.log('  Processing of first ' + buildcacheIncrement + ' locations.');
-            } else {
-                console.log('  Processing of next ' + buildcacheIncrement + ' locations.');
+            if (buildCache_rowcount > 2) {
+                start_proccess_batch_message  = '\n      Processing Next ' + buildcacheIncrement + ' locations.\n';
             }
-        } else {
-            buildCache_dot = buildCache_dot + '.';
         }
 
-        //messages for showing progress
-        console.log('    ' + this.name + '...' + result.rowCount + ' row(s) returned.');
+        complete_message = end_process_layer_message + end_process_batch_message + start_proccess_batch_message ;
+        buildCache_resultsArray.push(complete_message);
+        buildCache_rowcount = on_queryMessages(this, buildCache_rowcount, buildCache_array, buildCache_resultsArray);
 
     };
 
     //build the data cache
     var buildCache = function () {
         'use strict';
-        buildCache_rowcount = 0;
+
         var i = 0,
             id,
             theDistance,
             theName,
             buildCache_queryConfig;
 
-        //openclient and connection for buidling cache
-        buildCache_client = new pg.Client(dataBaseConnectionObject);
-        buildCache_client.on('drain', buildCache_Drain);
-        buildCache_client.connect(buildCache_clientError);
+          console.log('  Building Cache...');
+          console.log(' ');
+          console.log('      Batch Processing First 100 Locations....');
+
+          //open client and connection for Buidling Buffers
+          buildCache_client = new pg.Client(dataBaseConnectionObject)
+              .on('drain', buildCache_clientDrain)
+              .on('error', buildCache_clientError)
+              .on('end', buildCache_clientEnd);
+
+        //ope connection
+        buildCache_client.connect(buildCache_connectionError);
 
         /*
           loop count of all locations or addresses
@@ -1034,13 +1073,18 @@ if (program.buildcache) {
                         values: [buildcacheIncrement, i, theDistance]
                     };
 
+
+                    buildCache_array.push(buildCache_queryConfig.name);
+
                     /*
                       send query for building cache in groups of N
                       N is determeined by buildcacheIncrement
                     */
-                    buildCache_client.query(buildCache_queryConfig, buildCache_clientError)
+                    buildCache_client.query(buildCache_queryConfig)
+                        .on('error', buildCache_queryError)
                         .on('row', buildCache_queryRow)
                         .on('end', buildCache_queryEnd);
+
                 }
             }
         }
