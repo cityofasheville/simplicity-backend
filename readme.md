@@ -37,17 +37,16 @@ Usage: simplicity-backend [options]
 ##Setup
 
 ####Database Connection Setup & Configuration
-[Database Base Configuration](database_configuration.md)
+[Database Base Configuration](documentation/database_configuration.md)
 
 ####Maintenance Setup & Configuration
-[Maintenance Configuration](Maintenance_configuration.md)
+[Maintenance Configuration](documentation/maintenance_configuration.md)
 
 ####Data Tests Setup & Configuration
-[Data Tests Configuration](datatests_configuration.md)
-
+[Data Tests Configuration](documentation/datatests_configuration.md)
 
 ####Build Data Cache Setup & Configuration
-[Build Data Cache Configuration](buildcache_configuration.md)
+[Build Data Cache Configuration](documentation/buildcache_configuration.md)
 
 ##Software
 * PostGres 9.2
