@@ -1,1 +1,0 @@
-SELECT COUNT(*) from gisowner.coa_opendata_address_hold;

@@ -1,1 +1,0 @@
-TRUNCATE TABLE gisowner.coa_overlay_data_cache_hold;

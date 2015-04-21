@@ -1,1 +1,0 @@
-UPDATE gisowner.coa_opendata_address_hold set addressid = civicaddress_id::varchar(25);
