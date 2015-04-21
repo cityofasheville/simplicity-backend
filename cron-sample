@@ -1,0 +1,6 @@
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/home/vagrant/simplicity-backend
+MAILTO=root
+HOME=/home/vagrant/simplicity-backend/
+NODE_PATH=/home/vagrant/simplicity-backend/node_modules
+1 0 * * * simplicity_job.sh
