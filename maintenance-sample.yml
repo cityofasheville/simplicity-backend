@@ -1,7 +1,0 @@
-sql:
-- name: reindex postgres.table1
-  text: REINDEX TABLE postgres.table1;
-  values:
-- name: VACUUM postgres.table1
-  text: VACUUM ANALYZE postgres.table1;
-  values:

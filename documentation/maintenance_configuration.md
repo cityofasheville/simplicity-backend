@@ -3,7 +3,7 @@
 
 ####maintenance configuration
 ```sh
-$ cp maintenance-sample.yml config/maintenance.yml
+$ cp config/maintenance-sample.yml config/maintenance.yml
 ```
 
 edit `config/maintenance.yml` and update with your settings.

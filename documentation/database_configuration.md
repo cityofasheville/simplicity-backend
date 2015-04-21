@@ -3,7 +3,7 @@
 
 ###database connection
 ```sh
-$ cp db_sample.yml config/db.yml
+$ cp config/db_sample.yml config/db.yml
 ```
 **Warning:** naming this file anything but db.yml will push the database configuration including the password to github on a git push.
 

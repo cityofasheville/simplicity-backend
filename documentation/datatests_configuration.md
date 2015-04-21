@@ -3,7 +3,7 @@
 
 ####Data Tests Configuration
 ```sh
-$ cp datatests-sample.yml config/datatests.yml
+$ cp config/datatests-sample.yml config/datatests.yml
 ```
 
 edit `config/maintenance.yml` and update with your settings.

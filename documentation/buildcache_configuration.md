@@ -3,7 +3,7 @@
 
 ####Build Cache Configuration
 ```sh
-$ cp buildcache_sample.yml config/buildcache.yml
+$ cp config/buildcache_sample.yml config/buildcache.yml
 ```
 
 edit `config/buildcache.yml` and update with your settings.
