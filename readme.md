@@ -36,17 +36,17 @@ Usage: simplicity-backend [options]
 
 ##Setup
 
-###database connection
+###Database Connection Setup & Configuration
 [Database Base Configuration](database_configuration.md)
 
-####maintenance configuration
+####Maintenance Setup & Configuration
 [Maintenance Configuration](maintenance_configuration.md)
 
-####Data Tests Configuration
+####Data Tests Setup & Configuration
 [Data Tests Configuration](datatests_configuration.md)
 
 
-####Build Data Cache Configuration
+####Build Data Cache Setup & Configuration
 [Build Data Cache Configuration](buildcache_configuration.md)
 
 ##Software
