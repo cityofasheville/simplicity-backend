@@ -1,5 +1,5 @@
 #Maintenance Configuration
-[Back to main](readme.md)
+[Back to main](../readme.md)
 
 ####maintenance configuration
 ```sh

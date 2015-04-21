@@ -1,5 +1,5 @@
 #Database Configuration
-[Back to main](readme.md)
+[Back to main](../readme.md)
 
 ###database connection
 ```sh

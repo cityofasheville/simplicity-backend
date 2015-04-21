@@ -1,5 +1,5 @@
 #Data Tests Configuration
-[Back to main](readme.md)
+[Back to main](../readme.md)
 
 ####Data Tests Configuration
 ```sh

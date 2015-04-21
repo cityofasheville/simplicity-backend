@@ -1,5 +1,5 @@
 #Build Data Cache Configuration
-[Back to main](readme.md)
+[Back to main](../readme.md)
 
 ####Build Cache Configuration
 ```sh
