@@ -40,7 +40,7 @@ Usage: simplicity-backend [options]
 [Database Base Configuration](database_configuration.md)
 
 ####Maintenance Setup & Configuration
-[Maintenance Configuration](maintenance_configuration.md)
+[Maintenance Configuration](Maintenance_configuration.md)
 
 ####Data Tests Setup & Configuration
 [Data Tests Configuration](datatests_configuration.md)
