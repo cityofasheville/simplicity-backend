@@ -36,7 +36,7 @@ Usage: simplicity-backend [options]
 
 ##Setup
 
-###Database Connection Setup & Configuration
+####Database Connection Setup & Configuration
 [Database Base Configuration](database_configuration.md)
 
 ####Maintenance Setup & Configuration
