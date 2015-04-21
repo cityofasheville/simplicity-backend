@@ -43,6 +43,9 @@ Usage: simplicity-backend [options]
 [Maintenance Configuration](maintenance_configuration.md)
 
 ####Data Tests Configuration
+[Data Tests Configuration](datatests_configuration.md)
+
+
 ```sh
 $ cp datatests-sample.yml config/datatests.yml
 ```
