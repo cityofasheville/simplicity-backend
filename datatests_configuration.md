@@ -16,10 +16,10 @@ edit `config/maintenance.yml` and update with your settings.
 ```yaml
 testname: test name
 onsuccess:
-- name: TEST successful step 1
+- name: Truncate Table1
   text: TRUNCATE TABLE table1;
   values:
-- name: TEST successful step 2
+- name: Insert into table1
   text: INSERT INTO table1 (SELECT * FROM table1_stagging);
   values:
 tests:
@@ -40,7 +40,30 @@ $ node simplicity-backend.js -d config/db.yml -t config/datatests.yml
 ####returns:
 
 ```
-count table1 FAILED.
-type table1 PASSED.
-table1 tests Test Result: false
+Running Test(s) for  test name
+
+    Starting: count table1
+    Completed: count table1
+    PASSED
+
+    Starting: type table1
+    Completed: type table1
+    PASSED
+
+    Starting: location type
+    Completed: location type
+    PASSED
+
+Tests Complete.
+PASSED all tests for: test name
+
+Running Data Push for test name
+
+    Starting: Truncate Table1
+    Completed: Truncate Table1
+
+    Starting: Insert into table1
+    Completed: Insert into table1
+
+completed Data Test in 00:00:02.2881
 ```
