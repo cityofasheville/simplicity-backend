@@ -58,12 +58,15 @@ var on_queryMessages = function (current, rowcount, arr, secarr) {
 
     //called when completed;
     console.log('    Completed: ' + current.name);
+
     if (typeof secarr !== "undefined") {
         console.log('    ' + secarr[rowcount]);
     }
     console.log(' ');
 
     rowcount = rowcount + 1;
+    var percentComplete = ((rowcount / arr.length ) * 100).toFixed(2);
+    console.log('    Percent Completed: %' + percentComplete);
     //if not last call add starting of next one
     if (rowcount > 0 && rowcount < arr.length) {
         console.log('    Starting: ' + arr[rowcount]);
