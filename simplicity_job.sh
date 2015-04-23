@@ -20,3 +20,7 @@ node simplicity-backend.js -d config/db.yml -t config/datatests_zoningoverlays.y
 
 #remove files over a week old.
 find /home/ubuntu/simplicity-backend/log/*.log -mtime +14  -exec rm {} \;
+
+#this will only work with s3cmd setup and working.
+#change the apporpiate s3 bucket
+s3cmd put /home/ubuntu/simplicity-backend/log/*_$thedate.log s3://simplicity-backups/
