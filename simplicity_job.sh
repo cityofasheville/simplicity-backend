@@ -17,3 +17,6 @@ node simplicity-backend.js -d config/db.yml -t config/datatests_streetazimuthal.
 node simplicity-backend.js -d config/db.yml -t config/datatests_streets.yml >> log/datatest_$date.log
 node simplicity-backend.js -d config/db.yml -t config/datatests_zoning.yml >> log/datatest_$date.log
 node simplicity-backend.js -d config/db.yml -t config/datatests_zoningoverlays.yml >> log/datatest_$date.log
+
+#remove files over a week old.
+find log* -mtime +14  -exec rm {} \;
