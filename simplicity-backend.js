@@ -199,7 +199,7 @@ if (program.datatest) {
                 dataTests_check = false;
             }
         } else {
-            return;
+            dataTests_check = false;
         }
     };
 
