@@ -106,11 +106,11 @@ tests:
 - name: Cache: count Cache
   text: SELECT count(*) > $1 as check FROM gisowner.coa_address_buffers_cache_hold;
   values: [100000]
-- name:  count Cache distances
-  text: Cache: SELECT DISTINCT COUNT(distance) OVER() = $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY distance HAVING COUNT(distance) > 0;
+- name: Cache:  count Cache distances
+  text: SELECT DISTINCT COUNT(distance) OVER() = $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY distance HAVING COUNT(distance) > 0;
   values: [5]
-- name:  count Cache type
-  text: Cache: SELECT DISTINCT COUNT(data) OVER() > $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY data HAVING COUNT(data) > 0;
+- name: Cache: count Cache type
+  text: SELECT DISTINCT COUNT(data) OVER() > $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY data HAVING COUNT(data) > 0;
   values: [7]
 - name: Cache: Count Cache civicaddress_id
   text: SELECT DISTINCT COUNT(civicaddress_id) OVER() > $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY civicaddress_id HAVING COUNT(civicaddress_id) > 0;
