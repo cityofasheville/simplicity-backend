@@ -3,7 +3,7 @@ onsuccess:
 - name: truncate Permits
   text: TRUNCATE TABLE gisowner.coa_opendata_permits;
   values:
-- name: insert crimes
+- name: insert Permits
   text: INSERT INTO gisowner.coa_opendata_permits (SELECT * FROM gisowner.coa_opendata_permits_hold);
   values:
 tests:
