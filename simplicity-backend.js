@@ -199,6 +199,7 @@ if (program.datatest) {
                 dataTests_check = false;
             }
         } else {
+            dataTests_resultsArray.push('FAILED');
             dataTests_check = false;
         }
     };
