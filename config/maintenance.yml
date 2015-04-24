@@ -24,7 +24,7 @@ sql:
   text: UPDATE gisowner.coa_opendata_crime_hold SET pid = subquery.pid  FROM (SELECT objectid, row_number() OVER (ORDER BY (objectid))::integer as pid FROM gisowner.coa_opendata_crime_hold)  subquery WHERE subquery.objectid = coa_opendata_crime_hold.objectid
   values:
 - name: Update idnum in crime table
-  text: UPDATE gisowner.coa_opendata_crime_hold SET idnum = left(lower(source),1) || idnum;
+  text: UPDATE gisowner.coa_opendata_crime_hold SET idnum = left(lower(source),1) || replace(idnum,left(lower(source),1),'');
   values:
 - name: reindex buffer shape
   text: REINDEX INDEX gisowner.coa_address_buffers_cache_hold_shape;
