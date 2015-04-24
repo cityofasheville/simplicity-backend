@@ -210,6 +210,10 @@ if (program.datatest) {
     //when query ends
     var dataTests_queryEnd = function (result) {
         'use strict';
+        if (result.rowCount = 0) {
+          dataTests_resultsArray.push('FAILED');
+          dataTests_check = false;
+        }
         dataTests_rowcount = on_queryMessages(this, dataTests_rowcount, dataTests_array, dataTests_resultsArray);
     };
 
