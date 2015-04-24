@@ -19,6 +19,9 @@ tests:
 - name: Duplicate PIDS
   text: SELECT COALESCE( (SELECT count(pid)  as check from gisowner.coa_opendata_crime_hold group by pid having count(pid) > 1),0) = $1 as check;
   values: [0]
+- name: Duplicate idnum
+  text: SELECT COALESCE( (SELECT count(idnum)  as check from gisowner.coa_opendata_crime_hold group by idnum having count(idnum) > 1),0) = $1 as check;
+  values: [0]
 - name: offense types
   text: SELECT DISTINCT COUNT(offense) OVER() > $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY offense HAVING COUNT(offense) > 0 ;
   values: [5]
