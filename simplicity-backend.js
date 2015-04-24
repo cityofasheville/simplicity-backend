@@ -152,7 +152,7 @@ if (program.datatest) {
 
             //something failed
             console.log('FAILED test(s) for: ' + dataTests_YAML.testname + '.');
-            console.log('Failed a test!  Cache will not be built! Please see the log for details');
+            console.log('Failed a test! Data will not be Pushed to Production! Please see the log for details');
 
             //time
             endTime = new Date().getTime();
