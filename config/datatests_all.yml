@@ -12,6 +12,9 @@ onsuccess:
 - name: Insert Buffers
   text: INSERT INTO gisowner.coa_address_buffers_cache (SELECT * FROM gisowner.coa_address_buffers_cache_hold);
   values:
+- name: Truncate Cache
+  text: TRUNCATE TABLE gisowner.coa_overlay_data_cache;
+  values:
 - name: Insert Cache
   text: INSERT INTO gisowner.coa_overlay_data_cache (SELECT * FROM gisowner.coa_overlay_data_cache_hold);
   values:
@@ -26,9 +29,6 @@ onsuccess:
   values:
 - name: Insert crimes
   text: INSERT INTO gisowner.coa_opendata_crime (SELECT * FROM gisowner.coa_opendata_crime_hold);
-  values:
-- name: Truncate Cache
-  text: TRUNCATE TABLE gisowner.coa_overlay_data_cache;
   values:
 - name: Truncate Cross Reference
   text: TRUNCATE TABLE gisowner.coa_civicaddress_pinnum_centerline_xref_view;
