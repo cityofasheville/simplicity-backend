@@ -101,16 +101,16 @@ tests:
   text: SELECT( (SELECT COUNT(*) FROM gisowner.coa_address_buffers_cache_hold) = (SELECT COUNT(*) FROM gisowner.coa_opendata_address_hold)*$1) as check;
   values: [5]
 - name: Buffers: count distances
-  text:  select COALESCE( (SELECT DISTINCT COUNT(distance) OVER() = $1 as check FROM gisowner.coa_address_buffers_cache_hold GROUP BY distance HAVING COUNT(distance) > 0),false);
+  text:  SELECT COALESCE( (SELECT DISTINCT COUNT(distance) OVER() = $1 as check FROM gisowner.coa_address_buffers_cache_hold GROUP BY distance HAVING COUNT(distance) > 0),false);
   values: [5]
 - name: Cache: count Cache
   text: SELECT count(*) > $1 as check FROM gisowner.coa_address_buffers_cache_hold;
   values: [100000]
 - name: Cache:  count Cache distances
-  text: SELECT DISTINCT COUNT(distance) OVER() = $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY distance HAVING COUNT(distance) > 0;
+  text: SELECT COALESCE( (SELECT DISTINCT COUNT(distance) OVER() = $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY distance HAVING COUNT(distance) > 0),false);
   values: [5]
 - name: Cache: count Cache type
-  text: SELECT DISTINCT COUNT(data) OVER() > $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY data HAVING COUNT(data) > 0;
+  text: SELECT COALESCE( (SELECT DISTINCT COUNT(data) OVER() > $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY data HAVING COUNT(data) > 0),false);
   values: [7]
 - name: Cache: Count Cache civicaddress_id
   text: SELECT DISTINCT COUNT(civicaddress_id) OVER() > $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY civicaddress_id HAVING COUNT(civicaddress_id) > 0;

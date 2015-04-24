@@ -177,7 +177,10 @@ if (program.datatest) {
         'use strict';
         if (err) {
             console.error("Query Error: %s", err);
+            dataTests_resultsArray.push('FAILED');
             dataTests_check = false;
+        } else {
+
         }
         return err;
     };
