@@ -3,6 +3,7 @@ var pg = require('pg');
 var program = require('commander');
 pg.defaults.poolsize = 10;
 
+
 //args
 program
     .version('0.0.1')
@@ -1004,7 +1005,7 @@ if (program.buildcache) {
             }
         }
 
-        complete_message = end_process_layer_message + end_process_batch_message + start_proccess_batch_message ;
+        complete_message = end_process_layer_message + end_process_batch_message + start_proccess_batch_message;
         buildCache_resultsArray.push(complete_message);
         buildCache_rowcount = on_queryMessages(this, buildCache_rowcount, buildCache_array, buildCache_resultsArray);
 
@@ -1020,17 +1021,17 @@ if (program.buildcache) {
             theName,
             buildCache_queryConfig;
 
-          console.log('  Building Cache...');
-          console.log(' ');
-          console.log('      Batch Processing First 100 Locations');
+        console.log('  Building Cache...');
+        console.log(' ');
+        console.log('      Batch Processing First 100 Locations');
 
-          //open client and connection for Buidling Buffers
-          buildCache_client = new pg.Client(dataBaseConnectionObject)
-              .on('drain', buildCache_clientDrain)
-              .on('error', buildCache_clientError)
-              .on('end', buildCache_clientEnd);
+        //open client and connection for Buidling Buffers
+        buildCache_client = new pg.Client(dataBaseConnectionObject)
+            .on('drain', buildCache_clientDrain)
+            .on('error', buildCache_clientError)
+            .on('end', buildCache_clientEnd);
 
-        //ope connection
+        //open connection
         buildCache_client.connect(buildCache_connectionError);
 
         /*

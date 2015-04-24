@@ -85,174 +85,174 @@ onsuccess:
   text: INSERT INTO gisowner.coa_opendata_zoning_overlays (SELECT * FROM gisowner.coa_opendata_zoning_overlays_hold);
   values:
 tests:
-- name: Address - count address
+- name: Address: count address
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_address_hold;
   values: [10000]
-- name: Address - count neighborhood in address
+- name: Address: count neighborhood in address
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_address_hold WHERE neighborhood is not null;
   values: [-2]
-- name: Address - location type
+- name: Address: location type
   text: SELECT DISTINCT COUNT(location_type) OVER() > $1 as check FROM gisowner.coa_opendata_address_hold GROUP BY location_type HAVING COUNT(location_type) > 0 ;
   values: [3]
-- name: Buffers - count buffers
+- name: Buffers: count buffers
   text: SELECT count(*) > $1 as check FROM gisowner.coa_address_buffers_cache_hold;
   values: [10000]
-- name: Buffers - check buffers count vs address
+- name: Buffers: check buffers count vs address
   text: SELECT( (SELECT COUNT(*) FROM gisowner.coa_address_buffers_cache_hold) = (SELECT COUNT(*) FROM gisowner.coa_opendata_address_hold)*$1) as check
   values: [5]
-- name: Buffers - count distances
+- name: Buffers: count distances
   text: SELECT DISTINCT COUNT(distance) OVER() = $1 as check FROM gisowner.coa_address_buffers_cache_hold GROUP BY distance HAVING COUNT(distance) > 0;
   values: [5]
-- name: Cache - count Cache
+- name: Cache: count Cache
   text: SELECT count(*) > $1 as check FROM gisowner.coa_address_buffers_cache_hold;
   values: [100000]
 - name:  count Cache distances
-  text: Cache - SELECT DISTINCT COUNT(distance) OVER() = $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY distance HAVING COUNT(distance) > 0;
+  text: Cache: SELECT DISTINCT COUNT(distance) OVER() = $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY distance HAVING COUNT(distance) > 0;
   values: [5]
 - name:  count Cache type
-  text: Cache - SELECT DISTINCT COUNT(data) OVER() > $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY data HAVING COUNT(data) > 0;
+  text: Cache: SELECT DISTINCT COUNT(data) OVER() > $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY data HAVING COUNT(data) > 0;
   values: [7]
-- name: Cache - Count Cache civicaddress_id
+- name: Cache: Count Cache civicaddress_id
   text: SELECT DISTINCT COUNT(civicaddress_id) OVER() > $1 as check FROM gisowner.coa_overlay_data_cache_hold GROUP BY civicaddress_id HAVING COUNT(civicaddress_id) > 0;
   values: [100000]
-- name: City Limits - count city limits
+- name: City Limits: count city limits
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_city_limits_hold;
   values: [2]
-- name: City Limits - count city name
+- name: City Limits: count city name
   text: SELECT DISTINCT COUNT(jurisdiction_type) OVER() >= $1 as check FROM gisowner.coa_opendata_city_limits_hold GROUP BY jurisdiction_type HAVING COUNT(jurisdiction_type) > 0 ;
   values: [1]
-- name: Crime - count crimes
+- name: Crime: count crimes
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_crime_hold;
   values: [10000]
-- name: Crime - pid count
+- name: Crime: pid count
   text: SELECT DISTINCT COUNT(pid) OVER() > $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY pid HAVING COUNT(pid) > 0 ;
   values: [1000]
-- name: Crime - count neighborhood in crime
+- name: Crime: count neighborhood in crime
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_crime_hold WHERE neighborhood is not null;
   values: [100]
-- name: Crime - Duplicate PIDS
+- name: Crime: Duplicate PIDS
   text: SELECT COALESCE( (SELECT count(pid)  as check from gisowner.coa_opendata_crime_hold group by pid having count(pid) > 1),0) = $1 as check;
   values: [0]
-- name: Crime - Duplicate idnum
+- name: Crime: Duplicate idnum
   text: SELECT COALESCE( (SELECT count(idnum)  as check from gisowner.coa_opendata_crime_hold group by idnum having count(idnum) > 1),0) = $1 as check;
   values: [0]
-- name: Crime - offense types
+- name: Crime: offense types
   text: SELECT DISTINCT COUNT(offense) OVER() > $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY offense HAVING COUNT(offense) > 0 ;
   values: [5]
-- name: Crime - severity types
+- name: Crime: severity types
   text: SELECT DISTINCT COUNT(severity) OVER() > $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY severity HAVING COUNT(severity) > 0 ;
   values: [5]
-- name: Crime - source types
+- name: Crime: source types
   text: SELECT DISTINCT COUNT(source) OVER() = $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY source HAVING COUNT(source) > 0 ;
   values: [2]
-- name: Crime - crimes in last week
+- name: Crime: crimes in last week
   text: SELECT COALESCE( ( SELECT count(*) FROM gisowner.coa_opendata_crime_hold WHERE  EXTRACT(WEEK FROM thedate) = EXTRACT(WEEK FROM now()) and EXTRACT(YEAR FROM thedate) = EXTRACT(YEAR FROM now())),0) > $1 as check;
   values: [0]
-- name: Crime - crimes have multiple years
+- name: Crime: crimes have multiple years
   text: SELECT DISTINCT COUNT(EXTRACT(YEAR FROM thedate)) OVER() > $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY EXTRACT(YEAR FROM thedate) HAVING COUNT(EXTRACT(YEAR FROM thedate)) > 0 ;
   values: [3]
-- name: Cross Refrence - count address
+- name: Cross Refrence: count address
   text: SELECT count(*) > $1 as check FROM gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold;
   values: [10000]
-- name: Cross Refrence - civicaddress_id count
+- name: Cross Refrence: civicaddress_id count
   text: SELECT DISTINCT COUNT(civicaddress_id) OVER() > $1 as check FROM gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold GROUP BY civicaddress_id HAVING COUNT(civicaddress_id) > 0 ;
   values: [1000]
-- name: Cross Refrence - pinnum count
+- name: Cross Refrence: pinnum count
   text: SELECT DISTINCT COUNT(pinnum) OVER() > $1 as check FROM gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold GROUP BY pinnum HAVING COUNT(pinnum) > 0 ;
   values: [1000]
-- name: Cross Refrence - centerline_id count
+- name: Cross Refrence: centerline_id count
   text: SELECT DISTINCT COUNT(centerline_id) OVER() > $1 as check FROM gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold GROUP BY centerline_id HAVING COUNT(centerline_id) > 0 ;
   values: [1000]
-- name: Cross Refrence - changes have multiple years
+- name: Cross Refrence: changes have multiple years
   text: SELECT DISTINCT COUNT(EXTRACT(YEAR FROM change_date)) OVER() > $1 as check FROM gisowner.coa_civicaddress_pinnum_centerline_xref_view_hold GROUP BY EXTRACT(YEAR FROM change_date) HAVING COUNT(EXTRACT(YEAR FROM change_date)) > 0 ;
   values: [2]
-- name: Neighborhoods - count Neighborhoods
+- name: Neighborhoods: count Neighborhoods
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_asheville_neighborhoods_hold;
   values: [10]
-- name: Neighborhoods - count Name in Neighborhoods
+- name: Neighborhoods: count Name in Neighborhoods
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_asheville_neighborhoods_hold WHERE name is not null;
   values: [10]
-- name: Permits - count permits
+- name: Permits: count permits
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_permits_hold;
   values: [100000]
-- name: Permits - APN count
+- name: Permits: APN count
   text: SELECT DISTINCT COUNT(apn) OVER() > $1 as check FROM gisowner.coa_opendata_permits_hold GROUP BY apn HAVING COUNT(apn) > 0 ;
   values: [1000]
-- name: Permits - count neighborhood in permits
+- name: Permits: count neighborhood in permits
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_permits_hold WHERE neighborhood is not null;
   values: [100]
-- name: Permits - count comments in permits
+- name: Permits: count comments in permits
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_permits_hold WHERE record_comments is not null;
   values: [1000]
-- name: Permits - record_module count
+- name: Permits: record_module count
   text: SELECT DISTINCT COUNT(record_module) OVER() > $1 as check FROM gisowner.coa_opendata_permits_hold GROUP BY record_module HAVING COUNT(record_module) > 0 ;
   values: [2]
-- name: Permits - record_type count
+- name: Permits: record_type count
   text: SELECT DISTINCT COUNT(record_type) OVER() > $1 as check FROM gisowner.coa_opendata_permits_hold GROUP BY record_type HAVING COUNT(record_type) > 0 ;
   values: [5]
-- name: Permits - record_type_type count
+- name: Permits: record_type_type count
   text: SELECT DISTINCT COUNT(record_type_type) OVER() > $1 as check FROM gisowner.coa_opendata_permits_hold GROUP BY record_type_type HAVING COUNT(record_type_type) > 0 ;
   values: [5]
-- name: Permits - permits in last week
+- name: Permits: permits in last week
   text: SELECT COALESCE( ( SELECT count(*) FROM gisowner.coa_opendata_permits_hold WHERE  EXTRACT(WEEK FROM date_opened) = EXTRACT(WEEK FROM now()) and EXTRACT(YEAR FROM date_opened) = EXTRACT(YEAR FROM now())),0) > $1 as check;
   values: [0]
-- name: Permits - permits have multiple years
+- name: Permits: permits have multiple years
   text: SELECT DISTINCT COUNT(EXTRACT(YEAR FROM date_opened)) OVER() > $1 as check FROM gisowner.coa_opendata_permits_hold GROUP BY EXTRACT(YEAR FROM date_opened) HAVING COUNT(EXTRACT(YEAR FROM date_opened)) > 0 ;
   values: [3]
-- name: Property - count Property
+- name: Property: count Property
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_property_hold;
   values: [10000]
-- name: Property - count neighborhood in Property
+- name: Property: count neighborhood in Property
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_property_hold WHERE neighborhood is not null;
   values: [100]
-- name: Property - pinnum count
+- name: Property: pinnum count
   text: SELECT DISTINCT COUNT(pinnum) OVER() > $1 as check FROM gisowner.coa_opendata_property_hold GROUP BY pinnum HAVING COUNT(pinnum) > 0;
   values: [1000]
-- name: Property - owner name count
+- name: Property: owner name count
   text: SELECT DISTINCT COUNT(owner) OVER() > $1 as check FROM gisowner.coa_opendata_property_hold GROUP BY owner HAVING COUNT(owner) > 0;
   values: [1000]
-- name: Sanitation Districts - count Sanitation Districts
+- name: Sanitation Districts: count Sanitation Districts
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_sanitation_districts_hold;
   values: [100]
-- name: Sanitation Districts - truckday count
+- name: Sanitation Districts: truckday count
   text: SELECT DISTINCT COUNT(truckday) OVER() > $1 as check FROM gisowner.coa_opendata_sanitation_districts_hold GROUP BY truckday HAVING COUNT(truckday) > 0;
   values: [3]
-- name: Sanitation Districts - recday count
+- name: Sanitation Districts: recday count
   text: SELECT DISTINCT COUNT(recday) OVER() > $1 as check FROM gisowner.coa_opendata_sanitation_districts_hold GROUP BY recday HAVING COUNT(recday) > 0;
   values: [3]
-- name: Sanitation Districts - recdistrict count
+- name: Sanitation Districts: recdistrict count
   text: SELECT DISTINCT COUNT(recdistrict) OVER() > $1 as check FROM gisowner.coa_opendata_sanitation_districts_hold GROUP BY recdistrict HAVING COUNT(recdistrict) > 0;
   values: [1]
-- name: Street Azimuthal - count Street Azimuthal
+- name: Street Azimuthal: count Street Azimuthal
   text: SELECT count(*) > $1 as check FROM gisowner.coa_address_azimuthal_from_street_view_hold;
   values: [10000]
-- name: Street Azimuthal - count civicaddress_id in Street Azimuthal
+- name: Street Azimuthal: count civicaddress_id in Street Azimuthal
   text: SELECT count(*) > $1 as check FROM gisowner.coa_address_azimuthal_from_street_view_hold WHERE civicaddress_id is not null;
   values: [1000]
-- name: Streets - count Streets
+- name: Streets: count Streets
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_streets_hold;
   values: [1000]
-- name: Streets - Centerline_id count
+- name: Streets: Centerline_id count
   text: SELECT DISTINCT COUNT(centerline_id) OVER() > $1 as check FROM gisowner.coa_opendata_streets_hold GROUP BY centerline_id HAVING COUNT(centerline_id) > 0 ;
   values: [1000]
-- name: Streets - street_name count
+- name: Streets: street_name count
   text: SELECT DISTINCT COUNT(street_name) OVER() > $1 as check FROM gisowner.coa_opendata_streets_hold GROUP BY street_name HAVING COUNT(street_name) > 0 ;
   values: [500]
-- name: Zoning - count Zoning
+- name: Zoning: count Zoning
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_zoning_hold;
   values: [100]
-- name: Zoning - count districts in Zoning
+- name: Zoning: count districts in Zoning
   text: SELECT DISTINCT COUNT(districts) OVER() > $1 as check FROM gisowner.coa_opendata_zoning_hold GROUP BY districts HAVING COUNT(districts) > 0;
   values: [10]
-- name: Zoning - location districts
+- name: Zoning: location districts
   text: SELECT DISTINCT COUNT(districts) OVER() > $1 as check FROM gisowner.coa_opendata_zoning_hold GROUP BY districts HAVING COUNT(districts) > 0 ;
   values: [10]
-- name: Zoning Overlays - count Zoning Overlays
+- name: Zoning Overlays: count Zoning Overlays
   text: SELECT count(*) > $1 as check FROM gisowner.coa_opendata_zoning_overlays_hold;
   values: [100]
-- name: Zoning Overlays - count overlay_type in Zoning Overlays
+- name: Zoning Overlays: count overlay_type in Zoning Overlays
   text: SELECT DISTINCT COUNT(overlay_type) OVER() > $1 as check FROM gisowner.coa_opendata_zoning_overlays_hold GROUP BY overlay_type HAVING COUNT(overlay_type) > 0;
   values: [5]
-- name: Zoning Overlays - Overlays overlay_type
+- name: Zoning Overlays: Overlays overlay_type
   text: SELECT DISTINCT COUNT(overlay_type) OVER() > $1 as check FROM gisowner.coa_opendata_zoning_overlays_hold GROUP BY overlay_type HAVING COUNT(overlay_type) > 0 ;
   values: [4]
