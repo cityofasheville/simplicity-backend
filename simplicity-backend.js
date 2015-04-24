@@ -120,6 +120,7 @@ if (program.datatest) {
         'use strict';
         if (err) {
             console.error("Connection Error: %s", err);
+            dataTests_check = false;
         }
         return err;
     };
