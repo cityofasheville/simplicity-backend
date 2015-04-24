@@ -210,7 +210,7 @@ if (program.datatest) {
     //when query ends
     var dataTests_queryEnd = function (result) {
         'use strict';
-        if (result.rowCount = 0) {
+        if (result.rowCount === 0) {
           dataTests_resultsArray.push('FAILED');
           dataTests_check = false;
         }
