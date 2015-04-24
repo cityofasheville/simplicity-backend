@@ -98,10 +98,10 @@ tests:
   text: SELECT count(*) > $1 as check FROM gisowner.coa_address_buffers_cache_hold;
   values: [10000]
 - name: Buffers: check buffers count vs address
-  text: SELECT( (SELECT COUNT(*) FROM gisowner.coa_address_buffers_cache_hold) = (SELECT COUNT(*) FROM gisowner.coa_opendata_address_hold)*$1) as check
+  text: SELECT( (SELECT COUNT(*) FROM gisowner.coa_address_buffers_cache_hold) = (SELECT COUNT(*) FROM gisowner.coa_opendata_address_hold)*$1) as check;
   values: [5]
 - name: Buffers: count distances
-  text: SELECT DISTINCT COUNT(distance) OVER() = $1 as check FROM gisowner.coa_address_buffers_cache_hold GROUP BY distance HAVING COUNT(distance) > 0;
+  text:  select COALESCE( (SELECT DISTINCT COUNT(distance) OVER() = 5 as check FROM gisowner.coa_address_buffers_cache_hold GROUP BY distance HAVING COUNT(distance) > 0),false);
   values: [5]
 - name: Cache: count Cache
   text: SELECT count(*) > $1 as check FROM gisowner.coa_address_buffers_cache_hold;
