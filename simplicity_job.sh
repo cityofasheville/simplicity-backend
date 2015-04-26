@@ -1,4 +1,5 @@
 date=`date +%d-%m-%Y`
+export date=`date +%d-%m-%Y`
 
 node simplicity-backend.js -d config/db.yml -m config/maintenance.yml >> log/maintenance_$date.log
 node simplicity-backend.js -d config/db.yml -c config/buildcache.yml >> log/buildcache_$date.log
