@@ -12,4 +12,4 @@ find /home/ubuntu/simplicity-backend/log/*.log -mtime +14  -exec rm {} \;
 
 #this will only work with s3cmd setup and working.
 #change the apporpiate s3 bucket
-s3cmd put /home/ubuntu/simplicity-backend/log/*_$date.log s3://simplicity-backups/logs/
+/usr/bin/s3cmd put /home/ubuntu/simplicity-backend/log/*_$date.log s3://simplicity-backups/logs/
