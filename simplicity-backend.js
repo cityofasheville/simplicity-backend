@@ -121,6 +121,7 @@ if (program.datatest) {
         'use strict';
         if (err) {
             console.error("Connection Error: %s", err);
+            dataTests_resultsArray.push('FAILED');
             dataTests_check = false;
         }
         return err;
@@ -137,6 +138,7 @@ if (program.datatest) {
         'use strict';
         if (err) {
             console.error("Client Error: %s", err);
+            dataTests_resultsArray.push('FAILED');
             dataTests_check = false;
         }
         return err;
@@ -790,6 +792,8 @@ if (program.buildcache) {
         'use strict';
         if (err) {
             console.error("Connection Error: %s", err);
+            buildCacheCheck_resultsArray.push('FAILED');
+            buildCacheCheck_check = false;
         }
         return err;
     };
@@ -800,6 +804,8 @@ if (program.buildcache) {
         'use strict';
         if (err) {
             console.error("Client Error: %s", err);
+            buildCacheCheck_resultsArray.push('FAILED');
+            buildCacheCheck_check = false;
         }
         return err;
     };
@@ -846,6 +852,8 @@ if (program.buildcache) {
         'use strict';
         if (err) {
             console.error("Query Error: %s", err);
+            buildCacheCheck_resultsArray.push('FAILED');
+            buildCacheCheck_check = false;
         }
         return err;
     };
@@ -867,7 +875,8 @@ if (program.buildcache) {
                 buildCacheCheck_check = false;
             }
         } else {
-            return;
+            buildCacheCheck_resultsArray.push('FAILED');
+            buildCacheCheck_check = false;
         }
 
     };
@@ -875,6 +884,10 @@ if (program.buildcache) {
     //when a buffer check query ends
     var buildCacheCheck_queryEnd = function (result) {
         'use strict';
+        if (result.rowCount === 0) {
+          buildCacheCheck_resultsArray.push('FAILED');
+          buildCacheCheck_check = false;
+        }
         buildCacheCheck_rowcount = on_queryMessages(this, buildCacheCheck_rowcount, buildCacheCheck_array, buildCacheCheck_resultsArray);
         return result;
     };
