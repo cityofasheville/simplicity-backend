@@ -204,9 +204,8 @@ if (program.datatest) {
                 dataTests_check = false;
             }
         } else {
-              return result;
-            //dataTests_resultsArray.push('FAILED');
-            //dataTests_check = false;
+            dataTests_resultsArray.push('FAILED');
+            dataTests_check = false;
         }
     };
 
