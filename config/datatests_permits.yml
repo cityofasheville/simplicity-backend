@@ -28,8 +28,8 @@ tests:
 - name: record_type_type count
   text: SELECT DISTINCT COUNT(record_type_type) OVER() > $1 as check FROM gisowner.coa_opendata_permits_hold GROUP BY record_type_type HAVING COUNT(record_type_type) > 0 ;
   values: [5]
-- name:  permits in last week
-  text: SELECT COALESCE( ( SELECT count(*) FROM gisowner.coa_opendata_permits_hold WHERE  EXTRACT(WEEK FROM date_opened) = EXTRACT(WEEK FROM now()) and EXTRACT(YEAR FROM date_opened) = EXTRACT(YEAR FROM now())),0) > $1 as check;
+- name:  permits in last 2 weeks
+  text: SELECT COALESCE( ( SELECT count(*) FROM gisowner.coa_opendata_permits_hold WHERE  EXTRACT(WEEK FROM date_opened) >= (EXTRACT(WEEK FROM now())-1)  and EXTRACT(YEAR FROM date_opened) = EXTRACT(YEAR FROM now())),0) > $1 as check;
   values: [0]
 - name:  permits have multiple years
   text: SELECT DISTINCT COUNT(EXTRACT(YEAR FROM date_opened)) OVER() > $1 as check FROM gisowner.coa_opendata_permits_hold GROUP BY EXTRACT(YEAR FROM date_opened) HAVING COUNT(EXTRACT(YEAR FROM date_opened)) > 0 ;

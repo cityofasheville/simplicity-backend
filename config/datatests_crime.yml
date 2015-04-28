@@ -31,8 +31,8 @@ tests:
 - name: source types
   text: SELECT DISTINCT COUNT(source) OVER() = $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY source HAVING COUNT(source) > 0 ;
   values: [2]
-- name:  crimes in last week
-  text: SELECT COALESCE( ( SELECT count(*) FROM gisowner.coa_opendata_crime_hold WHERE  EXTRACT(WEEK FROM thedate) = EXTRACT(WEEK FROM now()) and EXTRACT(YEAR FROM thedate) = EXTRACT(YEAR FROM now())),0) > $1 as check;
+- name:  crimes in last 2 weeks
+  text: SELECT COALESCE( ( SELECT count(*) FROM gisowner.coa_opendata_crime_hold WHERE  EXTRACT(WEEK FROM thedate) >= (EXTRACT(WEEK FROM now())-1)  and EXTRACT(YEAR FROM thedate) = EXTRACT(YEAR FROM now())),0) > $1 as check;
   values: [0]
 - name:  crimes have multiple years
   text: SELECT DISTINCT COUNT(EXTRACT(YEAR FROM thedate)) OVER() > $1 as check FROM gisowner.coa_opendata_crime_hold GROUP BY EXTRACT(YEAR FROM thedate) HAVING COUNT(EXTRACT(YEAR FROM thedate)) > 0 ;
