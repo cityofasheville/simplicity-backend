@@ -81,7 +81,7 @@ onsuccess:
 - name: Truncate Zoning Overlays
   text: TRUNCATE TABLE gisowner.coa_opendata_zoning_overlays;
   values:
-- name: Insert Zoning
+- name: Insert Zoning Overlays
   text: INSERT INTO gisowner.coa_opendata_zoning_overlays (SELECT * FROM gisowner.coa_opendata_zoning_overlays_hold);
   values:
 tests:
