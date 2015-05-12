@@ -85,10 +85,10 @@ onsuccess:
   text: INSERT INTO gisowner.coa_opendata_zoning_overlays (SELECT * FROM gisowner.coa_opendata_zoning_overlays_hold);
   values:
 - name: Truncate Street Name Cache
-  text: TRUNCATE TABLE gisowner.coa_street_name_cache_hold;
+  text: TRUNCATE TABLE gisowner.coa_street_name_cache;
   values:
 - name: Insert Street Name Cache
-  text: INSERT INTO gisowner.coa_street_name_cache_hold (SELECT objectid, road_class, osm_type, full_street_name, street_prefix, street_name, street_type, street_postdirection, centerline_ids, shape, civicaddress_ids FROM gisowner.coa_street_name_view_hold);
+  text: INSERT INTO gisowner.coa_street_name_cache (SELECT * FROM gisowner.coa_street_name_cache_hold);
   values:
 tests:
 - name: Address: count address
